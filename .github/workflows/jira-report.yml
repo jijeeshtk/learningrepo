@@ -28,7 +28,7 @@ jobs:
         run: python jirareport_noemail.py
 
       - name: Upload report artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jira-report
           path: jira_report.json
