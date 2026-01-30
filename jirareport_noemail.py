@@ -46,6 +46,17 @@ def format_report(issues):
     report = {"issues": []}
     for issue in issues:
         fields = issue.get("fields", {})
+
+        # Handle Sprint field (can be list or dict)
+        sprint_field = fields.get("customfield_10020")
+        if isinstance(sprint_field, list):
+            sprint_names = [s.get("name", "") for s in sprint_field if isinstance(s, dict)]
+            sprint_value = ", ".join(sprint_names)
+        elif isinstance(sprint_field, dict):
+            sprint_value = sprint_field.get("name", "")
+        else:
+            sprint_value = ""
+
         report["issues"].append({
             "key": issue.get("key", ""),
             "summary": fields.get("summary", ""),
@@ -57,7 +68,7 @@ def format_report(issues):
             "EpicLink": fields.get("customfield_10014", ""),
             "Created": safe_date(fields.get("created")),
             "Resolved": safe_date(fields.get("resolutiondate")),
-            "Sprint": fields.get("customfield_10020", {}).get("name", "") if fields.get("customfield_10020") else "",
+            "Sprint": sprint_value,
             "AffectsVersions": [v.get("name", "") for v in fields.get("versions", [])] if fields.get("versions") else [],
             "FixVersions": [v.get("name", "") for v in fields.get("fixVersions", [])] if fields.get("fixVersions") else [],
             "Customers": fields.get("customfield_11049", ""),
