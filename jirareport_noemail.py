@@ -8,15 +8,12 @@ JIRA_URL = "https://atos-global.atlassian.net"
 JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 
-# JQL query
+# JQL
 JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -12h'
 
 def fetch_jira_issues():
     url = f"{JIRA_URL}/rest/api/3/search/jql"
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-    }
+    headers = { "Accept": "application/json", "Content-Type": "application/json" }
     auth = (JIRA_USER, JIRA_TOKEN)
 
     body = {
@@ -34,19 +31,17 @@ def fetch_jira_issues():
     response.raise_for_status()
     return response.json().get("issues", [])
 
-# Normalizes None → empty string
 def nz(value, default=""):
     if value is None or value == "":
         return default
     return value
 
-# Convert Jira datetime to mm/dd/yyyy or ""
 def safe_date(value):
     if not value:
         return ""
     try:
         return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y")
-    except Exception:
+    except:
         return nz(value)
 
 def format_report(issues):
@@ -55,43 +50,39 @@ def format_report(issues):
     for issue in issues:
         fields = issue.get("fields", {}) or {}
 
-        # Sprint field handling
+        # Sprint handling
         sprint_data = fields.get("customfield_10020")
         if isinstance(sprint_data, list):
-            sprint_value = ", ".join(
-                [nz(s.get("name", "")) for s in sprint_data if isinstance(s, dict)]
-            )
+            sprint_value = ", ".join([nz(s.get("name")) for s in sprint_data if isinstance(s, dict)])
         elif isinstance(sprint_data, dict):
             sprint_value = nz(sprint_data.get("name"))
         else:
             sprint_value = ""
 
         # Assignee
-        assignee = fields.get("assignee")
-        if isinstance(assignee, dict):
-            assignee_value = (
-                nz(assignee.get("emailAddress")) or nz(assignee.get("displayName"))
-            )
-        else:
-            assignee_value = ""
+        a = fields.get("assignee")
+        assignee_value = nz(a.get("emailAddress")) or nz(a.get("displayName")) if isinstance(a, dict) else ""
 
         # Reporter
-        reporter = fields.get("reporter")
-        if isinstance(reporter, dict):
-            reporter_value = (
-                nz(reporter.get("emailAddress")) or nz(reporter.get("displayName"))
-            )
-        else:
-            reporter_value = ""
+        r = fields.get("reporter")
+        reporter_value = nz(r.get("emailAddress")) or nz(r.get("displayName")) if isinstance(r, dict) else ""
 
-        # Versions lists
+        # AffectsVersions (array)
         affects_versions = [
-            nz(v.get("name", "")) for v in fields.get("versions", []) if isinstance(v, dict)
+            nz(v.get("name")) for v in fields.get("versions", []) if isinstance(v, dict)
         ]
 
+        # FixVersions (array)
         fix_versions = [
-            nz(v.get("name", "")) for v in fields.get("fixVersions", []) if isinstance(v, dict)
+            nz(v.get("name")) for v in fields.get("fixVersions", []) if isinstance(v, dict)
         ]
+
+        # Customers (list → comma-separated string)
+        customers_field = fields.get("customfield_11049", [])
+        if isinstance(customers_field, list):
+            customers_value = ", ".join([nz(c) for c in customers_field])
+        else:
+            customers_value = nz(customers_field)
 
         report["issues"].append({
             "key": nz(issue.get("key")),
@@ -104,10 +95,10 @@ def format_report(issues):
             "EpicLink": nz(fields.get("customfield_10014")),
             "Created": safe_date(fields.get("created")),
             "Resolved": safe_date(fields.get("resolutiondate")),
-            "Sprint": nz(sprint_value),
+            "Sprint": sprint_value,
             "AffectsVersions": affects_versions,
             "FixVersions": fix_versions,
-            "Customers": nz(fields.get("customfield_11049")),
+            "Customers": customers_value,
             "ScrumTeams": nz((fields.get("customfield_11034") or {}).get("value")),
             "Teams": nz((fields.get("customfield_10001") or {}).get("name")),
             "RootCause": nz((fields.get("customfield_11067") or {}).get("value")),
@@ -118,10 +109,10 @@ def format_report(issues):
     return json.dumps(report, indent=2)
 
 if __name__ == "__main__":
-    issues = fetch_jira_issues()
-    report = format_report(issues)
+    data = fetch_jira_issues()
+    output = format_report(data)
 
     with open("jira_report.json", "w") as f:
-        f.write(report)
+        f.write(output)
 
     print("Report generated: jira_report.json")
