@@ -31,38 +31,41 @@ def fetch_jira_issues():
     }
 
     response = requests.post(url, headers=headers, auth=auth, json=body)
-
-    print("Request URL:", response.url)
-    print("Response Code:", response.status_code)
-    print("Response Body (first 500 chars):", response.text[:500])
-
     response.raise_for_status()
     return response.json().get("issues", [])
+
+def safe_date(value):
+    if not value:
+        return ""
+    try:
+        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y")
+    except Exception:
+        return value
 
 def format_report(issues):
     report = {"issues": []}
     for issue in issues:
         fields = issue.get("fields", {})
         report["issues"].append({
-            "key": issue.get("key"),
-            "summary": fields.get("summary"),
-            "IssueType": fields.get("issuetype", {}).get("name") if fields.get("issuetype") else None,
-            "Status": fields.get("status", {}).get("name") if fields.get("status") else None,
-            "Priority": fields.get("priority", {}).get("name") if fields.get("priority") else None,
-            "Assignee": fields.get("assignee", {}).get("emailAddress") if fields.get("assignee") else None,
-            "Reporter": fields.get("reporter", {}).get("emailAddress") if fields.get("reporter") else None,
-            "EpicLink": fields.get("customfield_10014"),
-            "Created": datetime.strptime(fields["created"], "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y") if fields.get("created") else None,
-            "Resolved": datetime.strptime(fields["resolved"], "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y") if fields.get("resolved") else None,
-            "Sprint": fields.get("sprint", {}).get("name") if fields.get("sprint") else None,
-            "AffectsVersions": [v.get("name") for v in fields.get("versions", [])] if fields.get("versions") else [],
-            "FixVersions": [v.get("name") for v in fields.get("fixVersions", [])] if fields.get("fixVersions") else [],
-            "Customers": fields.get("customfield_11049"),
-            "ScrumTeams": fields.get("customfield_11034", {}).get("value") if fields.get("customfield_11034") else None,
-            "Teams": fields.get("customfield_10001", {}).get("name") if fields.get("customfield_10001") else None,
-            "RootCause": fields.get("customfield_11067", {}).get("value") if fields.get("customfield_11067") else None,
-            "BugMaturity": fields.get("customfield_11062"),
-            "ReleasePackage": fields.get("customfield_11055")
+            "key": issue.get("key", ""),
+            "summary": fields.get("summary", ""),
+            "IssueType": fields.get("issuetype", {}).get("name", ""),
+            "Status": fields.get("status", {}).get("name", ""),
+            "Priority": fields.get("priority", {}).get("name", ""),
+            "Assignee": fields.get("assignee", {}).get("emailAddress", "") if fields.get("assignee") else "",
+            "Reporter": fields.get("reporter", {}).get("emailAddress", "") if fields.get("reporter") else "",
+            "EpicLink": fields.get("customfield_10014", ""),
+            "Created": safe_date(fields.get("created")),
+            "Resolved": safe_date(fields.get("resolved")),
+            "Sprint": fields.get("sprint", {}).get("name", "") if fields.get("sprint") else "",
+            "AffectsVersions": [v.get("name", "") for v in fields.get("versions", [])],
+            "FixVersions": [v.get("name", "") for v in fields.get("fixVersions", [])],
+            "Customers": fields.get("customfield_11049", ""),
+            "ScrumTeams": fields.get("customfield_11034", {}).get("value", "") if fields.get("customfield_11034") else "",
+            "Teams": fields.get("customfield_10001", {}).get("name", "") if fields.get("customfield_10001") else "",
+            "RootCause": fields.get("customfield_11067", {}).get("value", "") if fields.get("customfield_11067") else "",
+            "BugMaturity": fields.get("customfield_11062", ""),
+            "ReleasePackage": fields.get("customfield_11055", "")
         })
     return json.dumps(report, indent=2)
 
@@ -70,7 +73,6 @@ if __name__ == "__main__":
     issues = fetch_jira_issues()
     report = format_report(issues)
 
-    # Save to file so GitHub Actions can upload it as an artifact
     with open("jira_report.json", "w") as f:
         f.write(report)
 
