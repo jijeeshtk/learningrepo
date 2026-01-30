@@ -34,50 +34,87 @@ def fetch_jira_issues():
     response.raise_for_status()
     return response.json().get("issues", [])
 
+# Normalizes None → empty string
+def nz(value, default=""):
+    if value is None or value == "":
+        return default
+    return value
+
+# Convert Jira datetime to mm/dd/yyyy or ""
 def safe_date(value):
     if not value:
         return ""
     try:
         return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y")
     except Exception:
-        return value
+        return nz(value)
 
 def format_report(issues):
     report = {"issues": []}
-    for issue in issues:
-        fields = issue.get("fields", {})
 
-        # Handle Sprint field (can be list or dict)
-        sprint_field = fields.get("customfield_10020")
-        if isinstance(sprint_field, list):
-            sprint_names = [s.get("name", "") for s in sprint_field if isinstance(s, dict)]
-            sprint_value = ", ".join(sprint_names)
-        elif isinstance(sprint_field, dict):
-            sprint_value = sprint_field.get("name", "")
+    for issue in issues:
+        fields = issue.get("fields", {}) or {}
+
+        # Sprint field handling
+        sprint_data = fields.get("customfield_10020")
+        if isinstance(sprint_data, list):
+            sprint_value = ", ".join(
+                [nz(s.get("name", "")) for s in sprint_data if isinstance(s, dict)]
+            )
+        elif isinstance(sprint_data, dict):
+            sprint_value = nz(sprint_data.get("name"))
         else:
             sprint_value = ""
 
+        # Assignee
+        assignee = fields.get("assignee")
+        if isinstance(assignee, dict):
+            assignee_value = (
+                nz(assignee.get("emailAddress")) or nz(assignee.get("displayName"))
+            )
+        else:
+            assignee_value = ""
+
+        # Reporter
+        reporter = fields.get("reporter")
+        if isinstance(reporter, dict):
+            reporter_value = (
+                nz(reporter.get("emailAddress")) or nz(reporter.get("displayName"))
+            )
+        else:
+            reporter_value = ""
+
+        # Versions lists
+        affects_versions = [
+            nz(v.get("name", "")) for v in fields.get("versions", []) if isinstance(v, dict)
+        ]
+
+        fix_versions = [
+            nz(v.get("name", "")) for v in fields.get("fixVersions", []) if isinstance(v, dict)
+        ]
+
         report["issues"].append({
-            "key": issue.get("key", ""),
-            "summary": fields.get("summary", ""),
-            "IssueType": fields.get("issuetype", {}).get("name", ""),
-            "Status": fields.get("status", {}).get("name", ""),
-            "Priority": fields.get("priority", {}).get("name", ""),
-            "Assignee": fields.get("assignee", {}).get("emailAddress") or fields.get("assignee", {}).get("displayName", "") if fields.get("assignee") else "",
-            "Reporter": fields.get("reporter", {}).get("emailAddress") or fields.get("reporter", {}).get("displayName", "") if fields.get("reporter") else "",
-            "EpicLink": fields.get("customfield_10014", ""),
+            "key": nz(issue.get("key")),
+            "summary": nz(fields.get("summary")),
+            "IssueType": nz((fields.get("issuetype") or {}).get("name")),
+            "Status": nz((fields.get("status") or {}).get("name")),
+            "Priority": nz((fields.get("priority") or {}).get("name")),
+            "Assignee": assignee_value,
+            "Reporter": reporter_value,
+            "EpicLink": nz(fields.get("customfield_10014")),
             "Created": safe_date(fields.get("created")),
             "Resolved": safe_date(fields.get("resolutiondate")),
-            "Sprint": sprint_value,
-            "AffectsVersions": [v.get("name", "") for v in fields.get("versions", [])] if fields.get("versions") else [],
-            "FixVersions": [v.get("name", "") for v in fields.get("fixVersions", [])] if fields.get("fixVersions") else [],
-            "Customers": fields.get("customfield_11049", ""),
-            "ScrumTeams": fields.get("customfield_11034", {}).get("value", "") if fields.get("customfield_11034") else "",
-            "Teams": fields.get("customfield_10001", {}).get("name", "") if fields.get("customfield_10001") else "",
-            "RootCause": fields.get("customfield_11067", {}).get("value", "") if fields.get("customfield_11067") else "",
-            "BugMaturity": fields.get("customfield_11062", ""),
-            "ReleasePackage": fields.get("customfield_11055", "")
+            "Sprint": nz(sprint_value),
+            "AffectsVersions": affects_versions,
+            "FixVersions": fix_versions,
+            "Customers": nz(fields.get("customfield_11049")),
+            "ScrumTeams": nz((fields.get("customfield_11034") or {}).get("value")),
+            "Teams": nz((fields.get("customfield_10001") or {}).get("name")),
+            "RootCause": nz((fields.get("customfield_11067") or {}).get("value")),
+            "BugMaturity": nz(fields.get("customfield_11062")),
+            "ReleasePackage": nz(fields.get("customfield_11055"))
         })
+
     return json.dumps(report, indent=2)
 
 if __name__ == "__main__":
