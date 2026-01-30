@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 # Jira credentials and base URL
-JIRA_URL = "https://atos-global.atlassian.net"   # no trailing slash
+JIRA_URL = "https://atos-global.atlassian.net"
 JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 
@@ -12,24 +12,26 @@ JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -12h'
 
 def fetch_jira_issues():
-    url = f"{JIRA_URL}/rest/api/3/search"
-    headers = {"Accept": "application/json"}
+    url = f"{JIRA_URL}/rest/api/3/search/jql"
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
     auth = (JIRA_USER, JIRA_TOKEN)
 
-    # Pass fields as a single comma-separated string
-    params = {
-        "jql": JQL,
-        "fields": ",".join([
+    # New API requires JQL in the body
+    body = {
+        "query": JQL,
+        "fields": [
             "summary", "issuetype", "status", "priority", "assignee", "reporter",
             "customfield_10014", "created", "resolved", "sprint", "versions",
             "fixVersions", "customfield_11049", "customfield_11034", "customfield_10001",
             "customfield_11067", "customfield_11062", "customfield_11055"
-        ])
+        ]
     }
 
-    response = requests.get(url, headers=headers, params=params, auth=auth)
+    response = requests.post(url, headers=headers, auth=auth, json=body)
 
-    # Debugging output (helpful if Jira rejects the request)
     print("Request URL:", response.url)
     print("Response Code:", response.status_code)
     print("Response Body (first 500 chars):", response.text[:500])
