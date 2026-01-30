@@ -19,7 +19,6 @@ def fetch_jira_issues():
     }
     auth = (JIRA_USER, JIRA_TOKEN)
 
-    # Correct payload for Jira Cloud
     body = {
         "jql": JQL,
         "fields": [
@@ -28,12 +27,11 @@ def fetch_jira_issues():
             "fixVersions", "customfield_11049", "customfield_11034", "customfield_10001",
             "customfield_11067", "customfield_11062", "customfield_11055"
         ],
-        "maxResults": 50   # optional, default is 50
+        "maxResults": 50
     }
 
     response = requests.post(url, headers=headers, auth=auth, json=body)
 
-    # Debugging output
     print("Request URL:", response.url)
     print("Response Code:", response.status_code)
     print("Response Body (first 500 chars):", response.text[:500])
@@ -48,17 +46,17 @@ def format_report(issues):
         report["issues"].append({
             "key": issue.get("key"),
             "summary": fields.get("summary"),
-            "IssueType": fields.get("issuetype", {}).get("name"),
-            "Status": fields.get("status", {}).get("name"),
-            "Priority": fields.get("priority", {}).get("name"),
-            "Assignee": fields.get("assignee", {}).get("emailAddress"),
-            "Reporter": fields.get("reporter", {}).get("emailAddress"),
+            "IssueType": fields.get("issuetype", {}).get("name") if fields.get("issuetype") else None,
+            "Status": fields.get("status", {}).get("name") if fields.get("status") else None,
+            "Priority": fields.get("priority", {}).get("name") if fields.get("priority") else None,
+            "Assignee": fields.get("assignee", {}).get("emailAddress") if fields.get("assignee") else None,
+            "Reporter": fields.get("reporter", {}).get("emailAddress") if fields.get("reporter") else None,
             "EpicLink": fields.get("customfield_10014"),
             "Created": datetime.strptime(fields["created"], "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y") if fields.get("created") else None,
             "Resolved": datetime.strptime(fields["resolved"], "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y") if fields.get("resolved") else None,
             "Sprint": fields.get("sprint", {}).get("name") if fields.get("sprint") else None,
-            "AffectsVersions": [v.get("name") for v in fields.get("versions", [])],
-            "FixVersions": [v.get("name") for v in fields.get("fixVersions", [])],
+            "AffectsVersions": [v.get("name") for v in fields.get("versions", [])] if fields.get("versions") else [],
+            "FixVersions": [v.get("name") for v in fields.get("fixVersions", [])] if fields.get("fixVersions") else [],
             "Customers": fields.get("customfield_11049"),
             "ScrumTeams": fields.get("customfield_11034", {}).get("value") if fields.get("customfield_11034") else None,
             "Teams": fields.get("customfield_10001", {}).get("name") if fields.get("customfield_10001") else None,
