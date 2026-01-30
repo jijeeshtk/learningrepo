@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 # Jira credentials and base URL
-JIRA_URL = "https://atos-global.atlassian.net/"
+JIRA_URL = "https://atos-global.atlassian.net"
 JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 
@@ -66,3 +66,4 @@ if __name__ == "__main__":
         f.write(report)
 
     print("Report generated: jira_report.json")
+
