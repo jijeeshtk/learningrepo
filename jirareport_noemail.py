@@ -13,7 +13,7 @@ JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -12h'
 
 def fetch_jira_issues():
     url = f"{JIRA_URL}/rest/api/3/search/jql"
-    headers = { "Accept": "application/json", "Content-Type": "application/json" }
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
     auth = (JIRA_USER, JIRA_TOKEN)
 
     body = {
@@ -32,17 +32,32 @@ def fetch_jira_issues():
     return response.json().get("issues", [])
 
 def nz(value, default=""):
+    """Coerce None/empty-string to default (string)."""
     if value is None or value == "":
         return default
     return value
+
+def to_string(value):
+    """
+    Coerce any value to a schema-safe string:
+    - None/empty -> ""
+    - numbers -> "n" / "n.n"
+    - other -> str(value)
+    """
+    if value is None or value == "":
+        return ""
+    if isinstance(value, (int, float)):
+        return str(value)
+    return str(value)
 
 def safe_date(value):
     if not value:
         return ""
     try:
+        # Jira format like: 2026-01-30T10:12:34.123+0000
         return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y")
-    except:
-        return nz(value)
+    except Exception:
+        return to_string(value)
 
 def format_report(issues):
     report = {"issues": []}
@@ -61,23 +76,19 @@ def format_report(issues):
 
         # Assignee
         a = fields.get("assignee")
-        assignee_value = nz(a.get("emailAddress")) or nz(a.get("displayName")) if isinstance(a, dict) else ""
+        assignee_value = (nz(a.get("emailAddress")) or nz(a.get("displayName"))) if isinstance(a, dict) else ""
 
         # Reporter
         r = fields.get("reporter")
-        reporter_value = nz(r.get("emailAddress")) or nz(r.get("displayName")) if isinstance(r, dict) else ""
+        reporter_value = (nz(r.get("emailAddress")) or nz(r.get("displayName"))) if isinstance(r, dict) else ""
 
         # AffectsVersions (array)
-        affects_versions = [
-            nz(v.get("name")) for v in fields.get("versions", []) if isinstance(v, dict)
-        ]
+        affects_versions = [nz(v.get("name")) for v in fields.get("versions", []) if isinstance(v, dict)]
 
         # FixVersions (array)
-        fix_versions = [
-            nz(v.get("name")) for v in fields.get("fixVersions", []) if isinstance(v, dict)
-        ]
+        fix_versions = [nz(v.get("name")) for v in fields.get("fixVersions", []) if isinstance(v, dict)]
 
-        # Customers (list → comma-separated string)
+        # Customers (list → comma-separated string OR passthrough if already string)
         customers_field = fields.get("customfield_11049", [])
         if isinstance(customers_field, list):
             customers_value = ", ".join([nz(c) for c in customers_field])
@@ -102,17 +113,18 @@ def format_report(issues):
             "ScrumTeams": nz((fields.get("customfield_11034") or {}).get("value")),
             "Teams": nz((fields.get("customfield_10001") or {}).get("name")),
             "RootCause": nz((fields.get("customfield_11067") or {}).get("value")),
-            "BugMaturity": nz(fields.get("customfield_11062")),
+            # 🔑 Coerce to string to satisfy your schema
+            "BugMaturity": to_string(fields.get("customfield_11062")),
             "ReleasePackage": nz(fields.get("customfield_11055"))
         })
 
     return json.dumps(report, indent=2)
 
 if __name__ == "__main__":
-    data = fetch_jira_issues()
-    output = format_report(data)
+    issues = fetch_jira_issues()
+    report = format_report(issues)
 
     with open("jira_report.json", "w") as f:
-        f.write(output)
+        f.write(report)
 
     print("Report generated: jira_report.json")
