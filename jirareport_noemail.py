@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 # Jira credentials and base URL
-JIRA_URL = "https://atos-global.atlassian.net"
+JIRA_URL = "https://atos-global.atlassian.net"   # no trailing slash
 JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 
@@ -19,19 +19,22 @@ def fetch_jira_issues():
     }
     auth = (JIRA_USER, JIRA_TOKEN)
 
-    # New API requires JQL in the body
+    # Correct payload for new Jira Cloud API
     body = {
-        "query": JQL,
-        "fields": [
-            "summary", "issuetype", "status", "priority", "assignee", "reporter",
-            "customfield_10014", "created", "resolved", "sprint", "versions",
-            "fixVersions", "customfield_11049", "customfield_11034", "customfield_10001",
-            "customfield_11067", "customfield_11062", "customfield_11055"
-        ]
+        "jql": JQL,
+        "fields": {
+            "include": [
+                "summary", "issuetype", "status", "priority", "assignee", "reporter",
+                "customfield_10014", "created", "resolved", "sprint", "versions",
+                "fixVersions", "customfield_11049", "customfield_11034", "customfield_10001",
+                "customfield_11067", "customfield_11062", "customfield_11055"
+            ]
+        }
     }
 
     response = requests.post(url, headers=headers, auth=auth, json=body)
 
+    # Debugging output
     print("Request URL:", response.url)
     print("Response Code:", response.status_code)
     print("Response Body (first 500 chars):", response.text[:500])
