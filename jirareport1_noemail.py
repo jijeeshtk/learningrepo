@@ -61,7 +61,7 @@ def format_report(issues):
 
         # Assignee
         a = fields.get("assignee")
-        assignee_value = nz(a.get("emailAddress")) if isinstance(a, dict) else ""
+        assignee_value = nz(a.get("assignee.emailAddress")) if isinstance(a, dict) else ""
 
         # Reporter
         r = fields.get("reporter")
@@ -116,4 +116,5 @@ if __name__ == "__main__":
         f.write(output)
 
     print("Report generated: jira_report.json")
+
 
