@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Jira report → email via internal SMTP relay (port 25, no authentication)
+Jira report → email via Microsoft 365 SMTP (smtp.office365.com:587, STARTTLS + auth)
 
 ENVIRONMENT VARIABLES
 ---------------------
@@ -19,10 +19,13 @@ MAIL_TO            (comma-separated list)
 MAIL_SUBJECT
 MAIL_REPLY_TO      (optional)
 
-# SMTP relay (no auth)
-SMTP_HOST          (e.g., mail.saacon.net)
-SMTP_PORT          (e.g., 25)
-SMTP_STARTTLS      (true/false; default false for port 25)
+# SMTP (M365)
+SMTP_HOST          (smtp.office365.com)
+SMTP_PORT          (587)
+SMTP_STARTTLS      (true)
+SMTP_REQUIRE_AUTH  (true)
+SMTP_USER          (full mailbox address, e.g., noreply@atos.net)
+SMTP_PASS          (password OR App Password if MFA enabled)
 """
 
 import os
@@ -63,14 +66,18 @@ PAGE_SIZE = int(os.getenv("JIRA_MAX_RESULTS", "50"))
 HTTP_TIMEOUT = (10, 60)  # (connect, read) seconds
 
 # =======================
-# Email Config (internal SMTP relay, no auth)
+# Email Config (M365 SMTP)
 # =======================
 
 SEND_EMAIL = os.getenv("SEND_EMAIL", "true").lower() in ("true", "1", "yes")
 
-SMTP_HOST = os.getenv("SMTP_HOST", "mail.saacon.net")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "25"))
-SMTP_STARTTLS = os.getenv("SMTP_STARTTLS", "false").lower() in ("true", "1", "yes")
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.office365.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_STARTTLS = os.getenv("SMTP_STARTTLS", "true").lower() in ("true", "1", "yes")
+
+SMTP_REQUIRE_AUTH = os.getenv("SMTP_REQUIRE_AUTH", "true").lower() in ("true", "1", "yes")
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
 
 MAIL_FROM = os.getenv("MAIL_FROM", "noreply@atos.net")
 MAIL_TO = os.getenv("MAIL_TO", "Jijeesh.valappil@atos.net")
@@ -343,7 +350,7 @@ def build_plaintext_body(issues_json: str) -> str:
     return "\n".join(lines)
 
 # =======================
-# Email (internal relay: no auth, optional STARTTLS)
+# Email (M365: STARTTLS + AUTH)
 # =======================
 
 def send_email_plaintext(subject: str, body: str, mail_from: str, mail_to_csv: str):
@@ -364,6 +371,10 @@ def send_email_plaintext(subject: str, body: str, mail_from: str, mail_to_csv: s
         msg["Reply-To"] = MAIL_REPLY_TO
     msg.set_content(body)  # plain text
 
+    # Validate auth configuration
+    if SMTP_REQUIRE_AUTH and (not SMTP_USER or not SMTP_PASS):
+        raise RuntimeError("SMTP_REQUIRE_AUTH=true but SMTP_USER/SMTP_PASS not set")
+
     attempts = 0
     max_attempts = 5
     backoff = 2  # exponential backoff base
@@ -375,9 +386,11 @@ def send_email_plaintext(subject: str, body: str, mail_from: str, mail_to_csv: s
                 if SMTP_STARTTLS:
                     context = ssl.create_default_context()
                     s.starttls(context=context)
+                if SMTP_REQUIRE_AUTH:
+                    s.login(SMTP_USER, SMTP_PASS)
 
                 s.send_message(msg)
-                print(f"Email sent via {SMTP_HOST}:{SMTP_PORT} (STARTTLS={SMTP_STARTTLS}, AUTH=False).")
+                print(f"Email sent via {SMTP_HOST}:{SMTP_PORT} (STARTTLS={SMTP_STARTTLS}, AUTH={SMTP_REQUIRE_AUTH}).")
                 return
 
         except smtplib.SMTPResponseException as e:
@@ -419,7 +432,7 @@ def main():
     print("\n===== Email preview (plain text) =====\n")
     print(body[:2000])
 
-    # 4) Send via internal SMTP relay (no auth)
+    # 4) Send via Microsoft 365 SMTP
     if SEND_EMAIL:
         send_email_plaintext(MAIL_SUBJECT, body, MAIL_FROM, MAIL_TO)
     else:
