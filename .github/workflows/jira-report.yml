@@ -1,4 +1,4 @@
-name: Jira report (email via internal relay, no auth)
+name: Jira reporting
 
 on:
   schedule:
