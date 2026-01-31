@@ -1,8 +1,6 @@
 import os
 import json
-import urllib.parse
 from datetime import datetime
-
 import requests
 
 # === Config ===
@@ -10,9 +8,7 @@ JIRA_URL = "https://atos-global.atlassian.net"
 JIRA_USER = os.getenv("JIRA_USER")     # Atlassian account email
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")   # API token from id.atlassian.com
 
-# IMPORTANT: URL-encode JQL for GET /search/jql
-JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -48h'
-ENCODED_JQL = urllib.parse.quote(JQL, safe="")
+JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -48h'  # <-- RAW JQL (DO NOT pre-encode)
 
 FIELDS = [
     "summary", "issuetype", "status", "priority", "assignee", "reporter",
@@ -30,18 +26,17 @@ def _nz(value, default=""):
 def _safe_date(value):
     if not value:
         return ""
-    fmts = ["%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%S%z"]
-    for fmt in fmts:
+    for fmt in ("%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%S%z"):
         try:
             return datetime.strptime(value, fmt).strftime("%m/%d/%Y")
         except Exception:
-            continue
+            pass
     return _nz(value)
 
 def fetch_all_issues():
     """
     Uses GET /rest/api/3/search/jql with nextPageToken pagination.
-    See Atlassian KB for guidance on /search/jql + URL-encoded JQL and token pagination.
+    Provide RAW JQL in params so 'requests' URL-encodes it exactly once.
     """
     url = f"{JIRA_URL}/rest/api/3/search/jql"
     headers = {"Accept": "application/json"}
@@ -52,21 +47,14 @@ def fetch_all_issues():
 
     while True:
         params = {
-            "jql": ENCODED_JQL,       # already URL-encoded per docs
+            "jql": JQL,                       # <-- raw JQL (no urllib.parse.quote)
             "maxResults": str(MAX_RESULTS),
             "fields": ",".join(FIELDS),
         }
         if next_token:
             params["nextPageToken"] = next_token
 
-        # NOTE: Atlassian expects jql param URL-encoded; we pass encoded string.
-        # requests will re-encode, but because we encoded fully, it’s fine.
         resp = requests.get(url, headers=headers, auth=auth, params=params)
-        if resp.status_code == 410:
-            raise RuntimeError(
-                "This site no longer supports the old search endpoints. "
-                "Confirm you are calling GET /rest/api/3/search/jql."
-            )
         try:
             resp.raise_for_status()
         except requests.HTTPError:
@@ -80,7 +68,6 @@ def fetch_all_issues():
         issues = data.get("issues", [])
         all_issues.extend(issues)
 
-        # Token-based pagination (no startAt). Stop when no token is present.
         next_token = data.get("nextPageToken")
         if not next_token:
             break
@@ -90,7 +77,7 @@ def fetch_all_issues():
 def fetch_user_emails_bulk(account_ids):
     """
     Resolve emails via /rest/api/3/user/bulk.
-    NOTE: emailAddress is returned only if org/user visibility allows it.
+    NOTE: emailAddress returns only if your org/user visibility allows it.
     """
     if not account_ids:
         return {}
@@ -101,33 +88,23 @@ def fetch_user_emails_bulk(account_ids):
 
     params = [("accountId", aid) for aid in account_ids]
     resp = requests.get(url, headers=headers, auth=auth, params=params)
-
-    try:
-        resp.raise_for_status()
-    except requests.HTTPError:
-        print("Bulk user API failed.")
-        print("Status:", resp.status_code)
-        print("URL:", resp.url)
-        print("Response:", resp.text[:2000])
-        raise
+    resp.raise_for_status()
 
     data = resp.json() or {}
     out = {}
     for u in data.get("values", []):
-        aid = u.get("accountId")
-        out[aid] = {
-            "email": u.get("emailAddress"),      # may be None if hidden by policy
+        out[u.get("accountId")] = {
+            "email": u.get("emailAddress"),     # may be None if hidden by policy
             "name": u.get("displayName")
         }
     return out
 
 def format_report(issues):
-    # Build accountId set for assignee + reporter
+    # Collect accountIds for assignee + reporter
     account_ids = set()
     for issue in issues:
         f = issue.get("fields", {}) or {}
-        a = f.get("assignee")
-        r = f.get("reporter")
+        a, r = f.get("assignee"), f.get("reporter")
         if isinstance(a, dict) and a.get("accountId"):
             account_ids.add(a["accountId"])
         if isinstance(r, dict) and r.get("accountId"):
@@ -139,12 +116,10 @@ def format_report(issues):
     for issue in issues:
         fields = issue.get("fields", {}) or {}
 
-        # Sprint (customfield_10020 can be dict or list (depending on app/board))
+        # Sprint can be dict or list depending on board/app
         sprint_data = fields.get("customfield_10020")
         if isinstance(sprint_data, list):
-            sprint_value = ", ".join(
-                [_nz(s.get("name")) for s in sprint_data if isinstance(s, dict)]
-            )
+            sprint_value = ", ".join([_nz(s.get("name")) for s in sprint_data if isinstance(s, dict)])
         elif isinstance(sprint_data, dict):
             sprint_value = _nz(sprint_data.get("name"))
         else:
@@ -152,8 +127,7 @@ def format_report(issues):
 
         # Assignee
         a = fields.get("assignee")
-        assignee_email = ""
-        assignee_name = ""
+        assignee_email, assignee_name = "", ""
         if isinstance(a, dict):
             aid = a.get("accountId")
             assignee_name = _nz(a.get("displayName"))
@@ -163,8 +137,7 @@ def format_report(issues):
 
         # Reporter
         r = fields.get("reporter")
-        reporter_email = ""
-        reporter_name = ""
+        reporter_email, reporter_name = "", ""
         if isinstance(r, dict):
             rid = r.get("accountId")
             reporter_name = _nz(r.get("displayName"))
@@ -173,13 +146,10 @@ def format_report(issues):
         reporter_value = reporter_email if reporter_email else reporter_name
 
         affects_versions = [_nz(v.get("name")) for v in (fields.get("versions") or []) if isinstance(v, dict)]
-        fix_versions = [_nz(v.get("name")) for v in (fields.get("fixVersions") or []) if isinstance(v, dict)]
+        fix_versions     = [_nz(v.get("name")) for v in (fields.get("fixVersions") or []) if isinstance(v, dict)]
 
         customers_field = fields.get("customfield_11049", [])
-        if isinstance(customers_field, list):
-            customers_value = ", ".join([_nz(c) for c in customers_field])
-        else:
-            customers_value = _nz(customers_field)
+        customers_value = ", ".join([_nz(c) for c in customers_field]) if isinstance(customers_field, list) else _nz(customers_field)
 
         report["issues"].append({
             "key": _nz(issue.get("key")),
@@ -200,7 +170,7 @@ def format_report(issues):
             "Teams": _nz((fields.get("customfield_10001") or {}).get("name")),
             "RootCause": _nz((fields.get("customfield_11067") or {}).get("value")),
             "BugMaturity": _nz(fields.get("customfield_11062")),
-            "ReleasePackage": _nz(fields.get("customfield_11055"))
+            "ReleasePackage": _nz(fields.get("customfield_11055")),
         })
 
     return json.dumps(report, indent=2)
@@ -208,11 +178,8 @@ def format_report(issues):
 if __name__ == "__main__":
     if not JIRA_USER or not JIRA_TOKEN:
         raise SystemExit("JIRA_USER or JIRA_TOKEN not set.")
-
     issues = fetch_all_issues()
     output = format_report(issues)
-
     with open("jira_report.json", "w") as f:
         f.write(output)
-
     print("Report generated: jira_report.json")
