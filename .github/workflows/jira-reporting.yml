@@ -1,4 +1,4 @@
-name: Jira report (email via internal relay, no auth)
+name: Jira report (email via Microsoft 365 SMTP)
 
 on:
   schedule:
@@ -20,7 +20,7 @@ jobs:
       - name: Install deps
         run: python -m pip install --upgrade requests
 
-      - name: Run report and email (internal relay, no auth)
+      - name: Run report and email (M365 SMTP AUTH)
         env:
           # --- Jira ---
           JIRA_URL: https://atos-global.atlassian.net
@@ -35,14 +35,16 @@ jobs:
           MAIL_TO: 'Jijeesh.valappil@atos.net'
           MAIL_SUBJECT: '[Jira] Bug/Defect report (last 6h)'
 
-          # --- Internal SMTP relay (no auth) ---
-          SMTP_HOST: 'mail.saacon.net'
-          SMTP_PORT: '25'
-          SMTP_STARTTLS: 'false'   # flip to 'true' if your server supports STARTTLS on 25
+          # --- Microsoft 365 SMTP (smtp.office365.com:587, STARTTLS + AUTH) ---
+          SMTP_HOST: 'smtp.office365.com'
+          SMTP_PORT: '587'
+          SMTP_STARTTLS: 'true'
+          SMTP_REQUIRE_AUTH: 'true'
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
         run: |
           python jira_report_email.py
 
-      # --- Diagnostics to avoid "No files found" confusion ---
       - name: Verify file exists
         run: |
           echo "CWD: $(pwd)"
