@@ -1,4 +1,4 @@
-name: Jira report (email via internal relay)
+name: Jira report (email via internal relay, no auth)
 
 on:
   schedule:
@@ -20,13 +20,13 @@ jobs:
       - name: Install deps
         run: python -m pip install --upgrade requests
 
-      - name: Run report and email (internal relay)
+      - name: Run report and email (internal relay, no auth)
         env:
           # --- Jira ---
           JIRA_URL: https://atos-global.atlassian.net
           JIRA_USER: ${{ secrets.JIRA_USER }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-          # NOTE: ensure >= is NOT HTML-escaped
+          # IMPORTANT: use the literal >= (not HTML-escaped)
           JIRA_JQL: 'project = VCS AND type IN (Bug, Defect) AND updated >= -6h'
 
           # --- Email content ---
@@ -35,14 +35,11 @@ jobs:
           MAIL_TO: 'Jijeesh.valappil@atos.net'
           MAIL_SUBJECT: '[Jira] Bug/Defect report (last 6h)'
 
-          # --- Internal SMTP relay (mail.saacon.net:25) ---
+          # --- Internal SMTP relay (no auth) ---
           SMTP_HOST: 'mail.saacon.net'
           SMTP_PORT: '25'
-          SMTP_STARTTLS: 'false'          # set 'true' only if your server supports STARTTLS on 25
-          SMTP_REQUIRE_AUTH: 'true'
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-
+          SMTP_STARTTLS: 'false'   # flip to 'true' only if your server supports STARTTLS on 25
+          # No SMTP user/pass variables anymore
         run: |
           python jira_report_email.py
 
@@ -51,3 +48,4 @@ jobs:
         with:
           name: jira-report-json
           path: jira_report.json
+``
