@@ -1,0 +1,42 @@
+name: Jira report (email via relay)
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"    # every 3 hours (UTC)
+  workflow_dispatch: {}
+
+jobs:
+  build-and-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: python -m pip install --upgrade requests
+
+      - name: Run report and email (relay, no auth)
+        env:
+          # --- Jira ---
+          JIRA_URL: https://atos-global.atlassian.net
+          JIRA_USER: ${{ secrets.JIRA_USER }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          JIRA_JQL: 'project = VCS AND type IN (Bug, Defect) AND updated >= -6h'
+
+          # --- Email via relay (From/To as requested) ---
+          SEND_EMAIL: 'true'
+          MAIL_FROM: 'noreply@atos.net'
+          MAIL_TO: 'jijeesh.valappil@atos.net'
+          MAIL_SUBJECT: '[Jira] Bug/Defect report (last 6h)'
+        run: |
+          python jira_report_email.py
+
+      - name: Upload JSON artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-report-json
+          path: jira_report.json
