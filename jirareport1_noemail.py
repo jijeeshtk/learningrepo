@@ -5,8 +5,8 @@ from datetime import datetime
 
 # Jira credentials and base URL
 JIRA_URL = "https://atos-global.atlassian.net"
-JIRA_USER = os.getenv("JIRA_USER")  # must be the Atlassian account email for basic auth
-JIRA_TOKEN = os.getenv("JIRA_TOKEN")  # API token generated from id.atlassian.com
+JIRA_USER = os.getenv("JIRA_USER")   # Atlassian account email
+JIRA_TOKEN = os.getenv("JIRA_TOKEN") # API token from id.atlassian.com
 
 # JQL
 JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -48h'
@@ -18,78 +18,54 @@ FIELDS = [
     "customfield_11067", "customfield_11062", "customfield_11055"
 ]
 
-def _search_get(jql: str, fields: list, max_results: int = 50, start_at: int = 0):
+def fetch_jira_issues(max_results=50, start_at=0):
     """
-    Preferred: GET /rest/api/3/search with query params.
+    Fetch issues using the new POST /rest/api/3/search/jql endpoint.
+    Supports pagination via startAt/maxResults if needed.
     """
-    url = f"{JIRA_URL}/rest/api/3/search"
-    headers = {"Accept": "application/json"}
-    auth = (JIRA_USER, JIRA_TOKEN)
-
-    params = {
-        "jql": jql,
-        "maxResults": max_results,
-        "startAt": start_at,
-        # fields can be comma-separated
-        "fields": ",".join(fields),
-    }
-
-    resp = requests.get(url, headers=headers, auth=auth, params=params)
-    return resp
-
-def _search_post(jql: str, fields: list, max_results: int = 50, start_at: int = 0):
-    """
-    Fallback: POST /rest/api/3/search with JSON body.
-    """
-    url = f"{JIRA_URL}/rest/api/3/search"
+    url = f"{JIRA_URL}/rest/api/3/search/jql"
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
     auth = (JIRA_USER, JIRA_TOKEN)
 
     body = {
-        "jql": jql,
-        "fields": fields,
+        "jql": JQL,
+        "fields": FIELDS,
         "maxResults": max_results,
         "startAt": start_at,
     }
 
     resp = requests.post(url, headers=headers, auth=auth, json=body)
-    return resp
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError:
+        print("Search API call failed (search/jql).")
+        print("Status:", resp.status_code)
+        print("URL:", url)
+        try:
+            print("Response:", resp.text[:2000])
+        except Exception:
+            pass
+        raise
 
-def fetch_jira_issues(max_results=50):
+    data = resp.json() or {}
+    return data
+
+def fetch_all_issues():
     """
-    Fetches issues using GET first; if certain status codes (410/405) occur,
-    falls back to POST automatically.
-    Also supports pagination if needed.
+    Paginates through all issues via /search/jql until total is reached.
     """
     all_issues = []
     start_at = 0
+    page_size = 50
 
     while True:
-        # Try GET first
-        resp = _search_get(JQL, FIELDS, max_results=max_results, start_at=start_at)
-        if resp.status_code in (410, 405, 404):  # some sites disallow GET/route
-            # Try POST fallback
-            resp = _search_post(JQL, FIELDS, max_results=max_results, start_at=start_at)
+        page = fetch_jira_issues(max_results=page_size, start_at=start_at)
+        issues = page.get("issues", [])
+        total = page.get("total", 0)
 
-        try:
-            resp.raise_for_status()
-        except requests.HTTPError as e:
-            # Print server response for diagnostics and re-raise
-            print("Search API call failed.")
-            print("Status:", resp.status_code)
-            print("URL:", resp.url)
-            try:
-                print("Response:", resp.text[:2000])
-            except Exception:
-                pass
-            raise
-
-        data = resp.json() or {}
-        issues = data.get("issues", [])
         all_issues.extend(issues)
-
-        total = data.get("total", len(all_issues))
         start_at += len(issues)
+
         if start_at >= total or not issues:
             break
 
@@ -97,8 +73,8 @@ def fetch_jira_issues(max_results=50):
 
 def fetch_user_emails_bulk(account_ids):
     """
-    Use Jira Cloud bulk user API to resolve emails.
-    NOTE: emailAddress is returned only if site setting and permissions allow it.
+    Resolve emails via Jira Cloud bulk user API.
+    Note: emailAddress is returned only if visibility is allowed for your org/user.
     """
     if not account_ids:
         return {}
@@ -126,7 +102,7 @@ def fetch_user_emails_bulk(account_ids):
     lookup = {}
     for u in data.get("values", []):
         account_id = u.get("accountId")
-        email = u.get("emailAddress")  # may be missing if not visible
+        email = u.get("emailAddress")  # may be omitted if hidden by policy
         display_name = u.get("displayName")
         lookup[account_id] = {"email": email, "name": display_name}
     return lookup
@@ -139,11 +115,9 @@ def nz(value, default=""):
 def safe_date(value):
     if not value:
         return ""
-    # Jira Cloud usually returns ISO 8601 with timezone, e.g. 2026-01-22T11:25:43.123+0000
     fmts = [
         "%Y-%m-%dT%H:%M:%S.%f%z",
         "%Y-%m-%dT%H:%M:%S%z",
-        "%Y-%m-%dT%H:%M:%S.%f%z",
     ]
     for fmt in fmts:
         try:
@@ -155,7 +129,7 @@ def safe_date(value):
 def format_report(issues):
     report = {"issues": []}
 
-    # Gather all assignee and reporter accountIds to resolve emails in one shot
+    # Collect accountIds (assignee + reporter) for bulk lookup
     account_ids = set()
     for issue in issues:
         f = issue.get("fields", {}) or {}
@@ -166,13 +140,13 @@ def format_report(issues):
         if isinstance(r, dict) and r.get("accountId"):
             account_ids.add(r["accountId"])
 
-    # Resolve emails via bulk API
+    # Resolve emails
     user_lookup = fetch_user_emails_bulk(account_ids)
 
     for issue in issues:
         fields = issue.get("fields", {}) or {}
 
-        # Sprint handling
+        # Sprint handling (customfield_10020 can be a list or a dict depending on boards/add-ons)
         sprint_data = fields.get("customfield_10020")
         if isinstance(sprint_data, list):
             sprint_value = ", ".join([nz(s.get("name")) for s in sprint_data if isinstance(s, dict)])
@@ -181,7 +155,7 @@ def format_report(issues):
         else:
             sprint_value = ""
 
-        # Assignee
+        # Assignee (prefer email if visible, else display name)
         a = fields.get("assignee")
         assignee_email = ""
         assignee_name = ""
@@ -192,7 +166,7 @@ def format_report(issues):
                 assignee_email = nz(user_lookup[aid].get("email"))
         assignee_value = assignee_email if assignee_email else assignee_name
 
-        # Reporter
+        # Reporter (prefer email if visible, else display name)
         r = fields.get("reporter")
         reporter_email = ""
         reporter_name = ""
@@ -226,8 +200,8 @@ def format_report(issues):
             "IssueType": nz((fields.get("issuetype") or {}).get("name")),
             "Status": nz((fields.get("status") or {}).get("name")),
             "Priority": nz((fields.get("priority") or {}).get("name")),
-            "Assignee": assignee_value,  # email if available; else name
-            "Reporter": reporter_value,  # email if available; else name
+            "Assignee": assignee_value,
+            "Reporter": reporter_value,
             "EpicLink": nz(fields.get("customfield_10014")),
             "Created": safe_date(fields.get("created")),
             "Resolved": safe_date(fields.get("resolutiondate")),
@@ -248,8 +222,7 @@ if __name__ == "__main__":
     # Basic env validation
     if not JIRA_USER or not JIRA_TOKEN:
         raise SystemExit("JIRA_USER or JIRA_TOKEN not set in environment.")
-    # Jira Cloud requires JIRA_USER to be your Atlassian account email
-    issues = fetch_jira_issues()
+    issues = fetch_all_issues()
     output = format_report(issues)
 
     with open("jira_report.json", "w") as f:
