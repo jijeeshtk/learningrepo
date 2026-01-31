@@ -29,7 +29,7 @@ jobs:
 
           # --- Email content ---
           SEND_EMAIL: 'true'
-          MAIL_FROM: 'noreply@atos.net'
+          MAIL_FROM: 'noreply@jiracloud.com'
           MAIL_TO: 'jijeesh.valappil@atos.net'
           MAIL_SUBJECT: '[Jira] Bug/Defect report (last 6h)'
 
