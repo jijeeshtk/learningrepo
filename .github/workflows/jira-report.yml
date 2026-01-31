@@ -1,8 +1,8 @@
-name: Jira report (email via relay)
+name: Jira report (email via Google SMTP relay)
 
 on:
   schedule:
-    - cron: "0 */3 * * *"    # every 3 hours (UTC)
+    - cron: "0 */3 * * *"   # every 3 hours (UTC)
   workflow_dispatch: {}
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
       - name: Install deps
         run: python -m pip install --upgrade requests
 
-      - name: Run report and email (relay, no auth)
+      - name: Run report and email (Google relay)
         env:
           # --- Jira ---
           JIRA_URL: https://atos-global.atlassian.net
@@ -27,11 +27,26 @@ jobs:
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
           JIRA_JQL: 'project = VCS AND type IN (Bug, Defect) AND updated >= -6h'
 
-          # --- Email via relay (From/To as requested) ---
+          # --- Email content ---
           SEND_EMAIL: 'true'
           MAIL_FROM: 'noreply@atos.net'
           MAIL_TO: 'jijeesh.valappil@atos.net'
           MAIL_SUBJECT: '[Jira] Bug/Defect report (last 6h)'
+
+          # --- Google SMTP relay settings ---
+          SMTP_HOST: 'smtp-relay.gmail.com'
+          SMTP_PORT: '587'
+          SMTP_STARTTLS: 'true'
+
+          # --- Authentication mode (recommended for GitHub-hosted runners) ---
+          SMTP_REQUIRE_AUTH: 'true'
+          SMTP_USER: ${{ secrets.GWSMTP_USER }}           # e.g., relay-svc@your-domain.tld
+          SMTP_PASS: ${{ secrets.GWSMTP_APP_PASSWORD }}   # 16-char App Password
+
+          # If using self-hosted/static-IP runner and Google IP-allowlist:
+          # SMTP_REQUIRE_AUTH: 'false'
+          # SMTP_USER: ''
+          # SMTP_PASS: ''
         run: |
           python jira_report_email.py
 
