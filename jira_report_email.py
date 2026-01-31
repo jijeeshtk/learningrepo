@@ -1,35 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Jira report → email via Google Workspace SMTP relay (STARTTLS with optional auth)
+Jira report → email via internal SMTP relay (port 25, no authentication)
 
 ENVIRONMENT VARIABLES
 ---------------------
 # Jira
-JIRA_URL           (e.g., https://yourdomain.atlassian.net)
-JIRA_USER          (Atlassian account email)
-JIRA_TOKEN         (API token from id.atlassian.com)
-JIRA_JQL           (raw JQL; do NOT pre-encode; example below)
-JIRA_MAX_RESULTS   (optional; default 50; page size for tokenized pagination)
+JIRA_URL
+JIRA_USER
+JIRA_TOKEN
+JIRA_JQL
+JIRA_MAX_RESULTS   (optional; default 50)
 
 # Email (content)
 SEND_EMAIL         (true/false; default true)
-MAIL_FROM          (e.g., noreply@yourdomain.com)
+MAIL_FROM
 MAIL_TO            (comma-separated list)
 MAIL_SUBJECT
 MAIL_REPLY_TO      (optional)
 
-# SMTP relay (Google)
-SMTP_HOST          (default: smtp-relay.gmail.com)
-SMTP_PORT          (default: 587)
-SMTP_STARTTLS      (true/false; default true)
-
-# Authentication mode:
-# 1) Recommended for GitHub-hosted runners: SMTP auth ON (user + app password)
-# 2) For static-IP/self-hosted runners: SMTP auth OFF + Google IP allowlist
-SMTP_REQUIRE_AUTH  (true/false; default false)
-SMTP_USER          (Workspace user email; required if REQUIRE_AUTH=true)
-SMTP_PASS          (App Password; required if REQUIRE_AUTH=true)
+# SMTP relay (no auth)
+SMTP_HOST          (e.g., mail.saacon.net)
+SMTP_PORT          (e.g., 25)
+SMTP_STARTTLS      (true/false; default false for port 25)
 """
 
 import os
@@ -42,7 +35,6 @@ from datetime import datetime
 from typing import Dict, List, Set, Tuple
 
 import requests
-
 
 # =======================
 # Jira & Search Config
@@ -70,26 +62,20 @@ FIELDS = [
 PAGE_SIZE = int(os.getenv("JIRA_MAX_RESULTS", "50"))
 HTTP_TIMEOUT = (10, 60)  # (connect, read) seconds
 
-
 # =======================
-# Email Config (Google SMTP relay)
+# Email Config (internal SMTP relay, no auth)
 # =======================
 
 SEND_EMAIL = os.getenv("SEND_EMAIL", "true").lower() in ("true", "1", "yes")
 
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp-relay.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_STARTTLS = os.getenv("SMTP_STARTTLS", "true").lower() in ("true", "1", "yes")
+SMTP_HOST = os.getenv("SMTP_HOST", "mail.saacon.net")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "25"))
+SMTP_STARTTLS = os.getenv("SMTP_STARTTLS", "false").lower() in ("true", "1", "yes")
 
-SMTP_REQUIRE_AUTH = os.getenv("SMTP_REQUIRE_AUTH", "false").lower() in ("true", "1", "yes")
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASS = os.getenv("SMTP_PASS", "")
-
-MAIL_FROM = os.getenv("MAIL_FROM", "noreply@jiracloud.com")
-MAIL_TO = os.getenv("MAIL_TO", "jijeesh.valappil@atos.net")
+MAIL_FROM = os.getenv("MAIL_FROM", "noreply@atos.net")
+MAIL_TO = os.getenv("MAIL_TO", "Jijeesh.valappil@atos.net")
 MAIL_SUBJECT = os.getenv("MAIL_SUBJECT", "[Jira] Bug/Defect report (last 6h)")
 MAIL_REPLY_TO = os.getenv("MAIL_REPLY_TO", "")
-
 
 # =======================
 # Helpers
@@ -122,7 +108,6 @@ def _extract_sprint_name(sprint_data) -> str:
     if isinstance(sprint_data, dict):
         return _nz(sprint_data.get("name"))
     return ""
-
 
 # =======================
 # Jira Calls
@@ -208,7 +193,6 @@ def fetch_user_emails_bulk(account_ids: Set[str]) -> Dict[str, Dict[str, str]]:
         }
     return out
 
-
 # =======================
 # Report building
 # =======================
@@ -279,7 +263,7 @@ def build_json_report(issues: List[dict]) -> str:
             "ScrumTeams": _nz((f.get("customfield_11034") or {}).get("value")),
             "Teams": _nz((f.get("customfield_10001") or {}).get("name")),
             "RootCause": _nz((f.get("customfield_11067") or {}).get("value")),
-            "BugMaturity": _to_string(f.get("customfield_11062")),  # schema-safe string
+            "BugMaturity": _to_string(f.get("customfield_11062")),
             "ReleasePackage": _nz(f.get("customfield_11055")),
         })
 
@@ -358,9 +342,8 @@ def build_plaintext_body(issues_json: str) -> str:
 
     return "\n".join(lines)
 
-
 # =======================
-# Email (Google relay: STARTTLS + optional auth)
+# Email (internal relay: no auth, optional STARTTLS)
 # =======================
 
 def send_email_plaintext(subject: str, body: str, mail_from: str, mail_to_csv: str):
@@ -392,13 +375,9 @@ def send_email_plaintext(subject: str, body: str, mail_from: str, mail_to_csv: s
                 if SMTP_STARTTLS:
                     context = ssl.create_default_context()
                     s.starttls(context=context)
-                if SMTP_REQUIRE_AUTH:
-                    if not SMTP_USER or not SMTP_PASS:
-                        raise RuntimeError("SMTP_REQUIRE_AUTH=true but SMTP_USER/SMTP_PASS not set")
-                    s.login(SMTP_USER, SMTP_PASS)
 
                 s.send_message(msg)
-                print(f"Email sent via {SMTP_HOST}:{SMTP_PORT} (STARTTLS={SMTP_STARTTLS}, AUTH={SMTP_REQUIRE_AUTH}).")
+                print(f"Email sent via {SMTP_HOST}:{SMTP_PORT} (STARTTLS={SMTP_STARTTLS}, AUTH=False).")
                 return
 
         except smtplib.SMTPResponseException as e:
@@ -421,7 +400,6 @@ def send_email_plaintext(subject: str, body: str, mail_from: str, mail_to_csv: s
                 continue
             raise
 
-
 # =======================
 # Main
 # =======================
@@ -439,13 +417,3 @@ def main():
     # 3) Build plaintext mail body
     body = build_plaintext_body(report_json)
     print("\n===== Email preview (plain text) =====\n")
-    print(body[:2000])
-
-    # 4) Send via Google SMTP relay
-    if SEND_EMAIL:
-        send_email_plaintext(MAIL_SUBJECT, body, MAIL_FROM, MAIL_TO)
-    else:
-        print("SEND_EMAIL is false; skipping email send.")
-
-if __name__ == "__main__":
-    main()
