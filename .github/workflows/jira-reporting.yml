@@ -26,7 +26,7 @@ jobs:
           JIRA_URL: https://atos-global.atlassian.net
           JIRA_USER: ${{ secrets.JIRA_USER }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-          # IMPORTANT: use the literal >= (not HTML-escaped)
+          # IMPORTANT: literal >= (not HTML-escaped)
           JIRA_JQL: 'project = VCS AND type IN (Bug, Defect) AND updated >= -6h'
 
           # --- Email content ---
@@ -38,8 +38,7 @@ jobs:
           # --- Internal SMTP relay (no auth) ---
           SMTP_HOST: 'mail.saacon.net'
           SMTP_PORT: '25'
-          SMTP_STARTTLS: 'false'   # flip to 'true' only if your server supports STARTTLS on 25
-          # No SMTP user/pass variables anymore
+          SMTP_STARTTLS: 'false'
         run: |
           python jira_report_email.py
 
@@ -48,4 +47,3 @@ jobs:
         with:
           name: jira-report-json
           path: jira_report.json
-``
