@@ -40,7 +40,9 @@ def build_jql(last_run_iso: str | None) -> str:
         return f'{base} AND updated >= -48h'
 
 def fetch_jira_issues(jql: str):
-    # NOTE: If /search/jql ever returns 404 for your site, switch to /rest/api/3/search
+    """
+    NOTE: If /search/jql behaves unexpectedly for your site, switch to: f"{JIRA_URL}/rest/api/3/search"
+    """
     url = f"{JIRA_URL}/rest/api/3/search/jql"
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
     auth = (JIRA_USER, JIRA_TOKEN)
@@ -81,6 +83,47 @@ def safe_date(value):
     except Exception:
         return to_string(value)
 
+# -------- Email resolution helpers --------
+
+def fetch_user_email_by_account_id(account_id: str) -> str:
+    """
+    Resolve a user's email via the user API using accountId.
+    Returns "" if not accessible.
+    """
+    if not account_id:
+        return ""
+    url = f"{JIRA_URL}/rest/api/3/user"
+    headers = {"Accept": "application/json"}
+    auth = (JIRA_USER, JIRA_TOKEN)
+    params = {"accountId": account_id}
+
+    try:
+        resp = requests.get(url, headers=headers, auth=auth, params=params, timeout=20)
+        if resp.status_code != 200:
+            return ""
+        data = resp.json()
+        return data.get("emailAddress") or ""
+    except Exception:
+        return ""
+
+def resolve_user_email(user_obj: dict) -> str:
+    """
+    Prefer emailAddress from the issue's user object.
+    If missing (common due to Jira Cloud privacy), fallback to user lookup by accountId.
+    Output is always an email or "" (no display name, no accountId in output).
+    """
+    if not isinstance(user_obj, dict):
+        return ""
+    # 1) Try direct email from fields (if your org exposes it)
+    email = user_obj.get("emailAddress")
+    if email:
+        return email
+    # 2) Fallback to user lookup by accountId (internal only, not exposed in output)
+    account_id = user_obj.get("accountId")
+    return fetch_user_email_by_account_id(account_id)
+
+# ------------------------------------------
+
 def format_report(issues):
     report = {"issues": []}
 
@@ -96,17 +139,11 @@ def format_report(issues):
         else:
             sprint_value = ""
 
-        # Assignee — email only (no displayName fallback)
-        a = fields.get("assignee")
-        assignee_email = a.get("emailAddress") if isinstance(a, dict) else ""
-        assignee_email = nz(assignee_email)
-        assignee_account_id = a.get("accountId") if isinstance(a, dict) else ""
+        # Assignee — output email only
+        assignee_email = resolve_user_email(fields.get("assignee"))
 
-        # Reporter — email only (no displayName fallback)
-        r = fields.get("reporter")
-        reporter_email = r.get("emailAddress") if isinstance(r, dict) else ""
-        reporter_email = nz(reporter_email)
-        reporter_account_id = r.get("accountId") if isinstance(r, dict) else ""
+        # Reporter — output email only
+        reporter_email = resolve_user_email(fields.get("reporter"))
 
         # AffectsVersions (array)
         affects_versions = [nz(v.get("name")) for v in fields.get("versions", []) if isinstance(v, dict)]
@@ -127,11 +164,8 @@ def format_report(issues):
             "IssueType": nz((fields.get("issuetype") or {}).get("name")),
             "Status": nz((fields.get("status") or {}).get("name")),
             "Priority": nz((fields.get("priority") or {}).get("name")),
-            "Assignee": assignee_email,            # email only
-            "Reporter": reporter_email,            # email only
-            # optional for troubleshooting if emails are blank due to privacy
-            "AssigneeAccountId": nz(assignee_account_id),
-            "ReporterAccountId": nz(reporter_account_id),
+            "Assignee": assignee_email,     # email only
+            "Reporter": reporter_email,     # email only
 
             "EpicLink": nz(fields.get("customfield_10014")),
             "Created": safe_date(fields.get("created")),
