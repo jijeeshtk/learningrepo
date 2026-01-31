@@ -24,7 +24,6 @@ def to_jql_datetime(dt: datetime) -> str:
     """
     Convert aware UTC datetime to Jira JQL datetime format: yyyy/MM/dd HH:mm
     """
-    # ensure UTC
     dt_utc = dt.astimezone(timezone.utc)
     return dt_utc.strftime("%Y/%m/%d %H:%M")
 
@@ -34,6 +33,7 @@ def build_jql(last_run_iso: str | None) -> str:
         # Parse the stored ISO time and convert to Jira format
         dt = datetime.fromisoformat(last_run_iso.replace("Z", "+00:00"))
         jql_time = to_jql_datetime(dt)
+        # IMPORTANT: use >= (not HTML-escaped)
         return f'{base} AND updated >= "{jql_time}"'
     else:
         # First run fallback window (no duplicates state yet)
@@ -96,13 +96,17 @@ def format_report(issues):
         else:
             sprint_value = ""
 
-        # Assignee
+        # Assignee — email only (no displayName fallback)
         a = fields.get("assignee")
-        assignee_value = (nz(a.get("emailAddress")) or nz(a.get("displayName"))) if isinstance(a, dict) else ""
+        assignee_email = a.get("emailAddress") if isinstance(a, dict) else ""
+        assignee_email = nz(assignee_email)
+        assignee_account_id = a.get("accountId") if isinstance(a, dict) else ""
 
-        # Reporter
+        # Reporter — email only (no displayName fallback)
         r = fields.get("reporter")
-        reporter_value = (nz(r.get("emailAddress")) or nz(r.get("displayName"))) if isinstance(r, dict) else ""
+        reporter_email = r.get("emailAddress") if isinstance(r, dict) else ""
+        reporter_email = nz(reporter_email)
+        reporter_account_id = r.get("accountId") if isinstance(r, dict) else ""
 
         # AffectsVersions (array)
         affects_versions = [nz(v.get("name")) for v in fields.get("versions", []) if isinstance(v, dict)]
@@ -123,8 +127,12 @@ def format_report(issues):
             "IssueType": nz((fields.get("issuetype") or {}).get("name")),
             "Status": nz((fields.get("status") or {}).get("name")),
             "Priority": nz((fields.get("priority") or {}).get("name")),
-            "Assignee": assignee_value,
-            "Reporter": reporter_value,
+            "Assignee": assignee_email,            # email only
+            "Reporter": reporter_email,            # email only
+            # optional for troubleshooting if emails are blank due to privacy
+            "AssigneeAccountId": nz(assignee_account_id),
+            "ReporterAccountId": nz(reporter_account_id),
+
             "EpicLink": nz(fields.get("customfield_10014")),
             "Created": safe_date(fields.get("created")),
             "Resolved": safe_date(fields.get("resolutiondate")),
