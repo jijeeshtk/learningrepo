@@ -61,11 +61,11 @@ def format_report(issues):
 
         # Assignee
         a = fields.get("assignee")
-        assignee_value = nz(a.get("assignee.emailAddress")) if isinstance(a, dict) else ""
+        assignee_value = nz(a.get("emailAddress")) or nz(a.get("displayName")) if isinstance(a, dict) else ""
 
         # Reporter
         r = fields.get("reporter")
-        reporter_value = nz(r.get("emailAddress")) if isinstance(r, dict) else ""
+        reporter_value = nz(r.get("emailAddress")) or nz(r.get("displayName")) if isinstance(r, dict) else ""
 
         # AffectsVersions (array)
         affects_versions = [
@@ -116,5 +116,3 @@ if __name__ == "__main__":
         f.write(output)
 
     print("Report generated: jira_report.json")
-
-
