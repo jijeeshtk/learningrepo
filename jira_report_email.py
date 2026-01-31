@@ -85,7 +85,7 @@ SMTP_REQUIRE_AUTH = os.getenv("SMTP_REQUIRE_AUTH", "false").lower() in ("true", 
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
 
-MAIL_FROM = os.getenv("MAIL_FROM", "noreply@atos.net")
+MAIL_FROM = os.getenv("MAIL_FROM", "noreply@jiracloud.com")
 MAIL_TO = os.getenv("MAIL_TO", "jijeesh.valappil@atos.net")
 MAIL_SUBJECT = os.getenv("MAIL_SUBJECT", "[Jira] Bug/Defect report (last 6h)")
 MAIL_REPLY_TO = os.getenv("MAIL_REPLY_TO", "")
