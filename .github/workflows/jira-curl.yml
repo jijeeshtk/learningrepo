@@ -1,0 +1,71 @@
+name: Jira JQL cURL Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      jql:
+        description: 'JQL to run (optional). Leave empty to use default in the step.'
+        required: false
+        default: ''
+
+jobs:
+  run-jira-curl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (optional)
+        uses: actions/checkout@v4
+
+      - name: Add mask for user (defense-in-depth)
+        # Mask the user value in case a command echoes it
+        run: |
+          echo "::add-mask::${{ secrets.JIRA_USER }}"
+        # Masking via ::add-mask:: prevents raw values appearing in logs. [4](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands)
+
+      - name: Ensure jq is available
+        run: |
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y jq
+          fi
+        # You can install packages on GitHub-hosted runners via apt. [5](https://docs.github.com/en/actions/how-tos/manage-runners/github-hosted-runners/customize-runners)
+
+      - name: Call Jira search (GET /rest/api/3/search/jql)
+        id: call
+        env:
+          JIRA_BASE: https://atos-global.atlassian.net
+          JIRA_USER: ${{ secrets.JIRA_USER }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          # Use the typed input if provided; else default below
+          INPUT_JQL: ${{ github.event.inputs.jql }}
+        run: |
+          set -euo pipefail
+          JQL="${INPUT_JQL:-project = VCS AND type IN (Bug, Defect) AND updated >= -48h}"
+
+          echo "Running JQL: $JQL"
+          # Fields you want back (comma-separated string)
+          FIELDS="summary,issuetype,status,priority,assignee,reporter,customfield_10014,created,resolutiondate,customfield_10020,versions,fixVersions,customfield_11049,customfield_11034,customfield_10001,customfield_11067,customfield_11062,customfield_11055"
+
+          # GET /rest/api/3/search/jql
+          # --get with --data-urlencode ensures JQL is encoded correctly for the querystring. [1](https://confluence.atlassian.com/jirakb/run-jql-search-query-using-jira-cloud-rest-api-1289424308.html)
+          curl --silent --show-error --fail \
+            --user "${JIRA_USER}:${JIRA_TOKEN}" \
+            --get "${JIRA_BASE}/rest/api/3/search/jql" \
+            --data-urlencode "jql=${JQL}" \
+            --data-urlencode "maxResults=50" \
+            --data-urlencode "fields=${FIELDS}" \
+            -H "Accept: application/json" \
+            -o response.json
+
+          echo "Preview (first issues):"
+          jq '{total, issues: (.issues[0:3] // []) | map({key, fields: {summary: .fields.summary, assignee: .fields.assignee.displayName, reporter: .fields.reporter.displayName}})}' response.json
+
+          # Expose total as a step output (use in later steps if needed)
+          TOTAL=$(jq -r '.total // 0' response.json)
+          echo "total=${TOTAL}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload raw JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-search-json
+          path: response.json
