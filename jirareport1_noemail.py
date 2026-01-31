@@ -5,32 +5,95 @@ from datetime import datetime
 
 # Jira credentials and base URL
 JIRA_URL = "https://atos-global.atlassian.net"
-JIRA_USER = os.getenv("JIRA_USER")
-JIRA_TOKEN = os.getenv("JIRA_TOKEN")
+JIRA_USER = os.getenv("JIRA_USER")  # must be the Atlassian account email for basic auth
+JIRA_TOKEN = os.getenv("JIRA_TOKEN")  # API token generated from id.atlassian.com
 
 # JQL
 JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -48h'
 
-def fetch_jira_issues():
-    # Correct endpoint for search
+FIELDS = [
+    "summary", "issuetype", "status", "priority", "assignee", "reporter",
+    "customfield_10014", "created", "resolutiondate", "customfield_10020", "versions",
+    "fixVersions", "customfield_11049", "customfield_11034", "customfield_10001",
+    "customfield_11067", "customfield_11062", "customfield_11055"
+]
+
+def _search_get(jql: str, fields: list, max_results: int = 50, start_at: int = 0):
+    """
+    Preferred: GET /rest/api/3/search with query params.
+    """
+    url = f"{JIRA_URL}/rest/api/3/search"
+    headers = {"Accept": "application/json"}
+    auth = (JIRA_USER, JIRA_TOKEN)
+
+    params = {
+        "jql": jql,
+        "maxResults": max_results,
+        "startAt": start_at,
+        # fields can be comma-separated
+        "fields": ",".join(fields),
+    }
+
+    resp = requests.get(url, headers=headers, auth=auth, params=params)
+    return resp
+
+def _search_post(jql: str, fields: list, max_results: int = 50, start_at: int = 0):
+    """
+    Fallback: POST /rest/api/3/search with JSON body.
+    """
     url = f"{JIRA_URL}/rest/api/3/search"
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
     auth = (JIRA_USER, JIRA_TOKEN)
 
     body = {
-        "jql": JQL,
-        "fields": [
-            "summary", "issuetype", "status", "priority", "assignee", "reporter",
-            "customfield_10014", "created", "resolutiondate", "customfield_10020", "versions",
-            "fixVersions", "customfield_11049", "customfield_11034", "customfield_10001",
-            "customfield_11067", "customfield_11062", "customfield_11055"
-        ],
-        "maxResults": 50
+        "jql": jql,
+        "fields": fields,
+        "maxResults": max_results,
+        "startAt": start_at,
     }
 
     resp = requests.post(url, headers=headers, auth=auth, json=body)
-    resp.raise_for_status()
-    return resp.json().get("issues", [])
+    return resp
+
+def fetch_jira_issues(max_results=50):
+    """
+    Fetches issues using GET first; if certain status codes (410/405) occur,
+    falls back to POST automatically.
+    Also supports pagination if needed.
+    """
+    all_issues = []
+    start_at = 0
+
+    while True:
+        # Try GET first
+        resp = _search_get(JQL, FIELDS, max_results=max_results, start_at=start_at)
+        if resp.status_code in (410, 405, 404):  # some sites disallow GET/route
+            # Try POST fallback
+            resp = _search_post(JQL, FIELDS, max_results=max_results, start_at=start_at)
+
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as e:
+            # Print server response for diagnostics and re-raise
+            print("Search API call failed.")
+            print("Status:", resp.status_code)
+            print("URL:", resp.url)
+            try:
+                print("Response:", resp.text[:2000])
+            except Exception:
+                pass
+            raise
+
+        data = resp.json() or {}
+        issues = data.get("issues", [])
+        all_issues.extend(issues)
+
+        total = data.get("total", len(all_issues))
+        start_at += len(issues)
+        if start_at >= total or not issues:
+            break
+
+    return all_issues
 
 def fetch_user_emails_bulk(account_ids):
     """
@@ -40,21 +103,26 @@ def fetch_user_emails_bulk(account_ids):
     if not account_ids:
         return {}
 
-    # The bulk API allows multiple accountId query params
-    # Example: /rest/api/3/user/bulk?accountId=id1&accountId=id2
     url = f"{JIRA_URL}/rest/api/3/user/bulk"
     headers = {"Accept": "application/json"}
     auth = (JIRA_USER, JIRA_TOKEN)
 
-    params = []
-    for aid in account_ids:
-        params.append(("accountId", aid))
+    params = [("accountId", aid) for aid in account_ids]
 
     resp = requests.get(url, headers=headers, auth=auth, params=params)
-    resp.raise_for_status()
-    data = resp.json() or {}
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError:
+        print("Bulk user API failed.")
+        print("Status:", resp.status_code)
+        print("URL:", resp.url)
+        try:
+            print("Response:", resp.text[:2000])
+        except Exception:
+            pass
+        raise
 
-    # Build a lookup: accountId -> email (if visible), and also keep displayName as fallback
+    data = resp.json() or {}
     lookup = {}
     for u in data.get("values", []):
         account_id = u.get("accountId")
@@ -71,10 +139,18 @@ def nz(value, default=""):
 def safe_date(value):
     if not value:
         return ""
-    try:
-        return datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%m/%d/%Y")
-    except Exception:
-        return nz(value)
+    # Jira Cloud usually returns ISO 8601 with timezone, e.g. 2026-01-22T11:25:43.123+0000
+    fmts = [
+        "%Y-%m-%dT%H:%M:%S.%f%z",
+        "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%dT%H:%M:%S.%f%z",
+    ]
+    for fmt in fmts:
+        try:
+            return datetime.strptime(value, fmt).strftime("%m/%d/%Y")
+        except Exception:
+            continue
+    return nz(value)
 
 def format_report(issues):
     report = {"issues": []}
@@ -114,7 +190,6 @@ def format_report(issues):
             assignee_name = nz(a.get("displayName"))
             if aid and aid in user_lookup:
                 assignee_email = nz(user_lookup[aid].get("email"))
-                # if email not visible, fallback to name
         assignee_value = assignee_email if assignee_email else assignee_name
 
         # Reporter
@@ -170,6 +245,10 @@ def format_report(issues):
     return json.dumps(report, indent=2)
 
 if __name__ == "__main__":
+    # Basic env validation
+    if not JIRA_USER or not JIRA_TOKEN:
+        raise SystemExit("JIRA_USER or JIRA_TOKEN not set in environment.")
+    # Jira Cloud requires JIRA_USER to be your Atlassian account email
     issues = fetch_jira_issues()
     output = format_report(issues)
 
