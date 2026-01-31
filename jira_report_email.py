@@ -263,7 +263,7 @@ def build_json_report(issues: List[dict]) -> str:
             "ScrumTeams": _nz((f.get("customfield_11034") or {}).get("value")),
             "Teams": _nz((f.get("customfield_10001") or {}).get("name")),
             "RootCause": _nz((f.get("customfield_11067") or {}).get("value")),
-            "BugMaturity": _to_string(f.get("customfield_11062")),
+            "BugMaturity": _to_string(f.get("customfield_11062")),  # schema-safe string
             "ReleasePackage": _nz(f.get("customfield_11055")),
         })
 
@@ -408,7 +408,7 @@ def main():
     # 1) Fetch from Jira
     issues = fetch_all_issues()
 
-    # 2) Build & persist JSON
+    # 2) Build & persist JSON (artifact always produced)
     report_json = build_json_report(issues)
     with open("jira_report.json", "w", encoding="utf-8") as f:
         f.write(report_json)
@@ -417,3 +417,13 @@ def main():
     # 3) Build plaintext mail body
     body = build_plaintext_body(report_json)
     print("\n===== Email preview (plain text) =====\n")
+    print(body[:2000])
+
+    # 4) Send via internal SMTP relay (no auth)
+    if SEND_EMAIL:
+        send_email_plaintext(MAIL_SUBJECT, body, MAIL_FROM, MAIL_TO)
+    else:
+        print("SEND_EMAIL is false; skipping email send.")
+
+if __name__ == "__main__":
+    main()
