@@ -17,11 +17,17 @@ jobs:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
     steps:
+      # ----------------------------------------
+      # Checkout repository
+      # ----------------------------------------
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ----------------------------------------
+      # Python setup
+      # ----------------------------------------
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -33,24 +39,36 @@ jobs:
           sudo apt-get install -y jq
           pip install requests
 
+      # ----------------------------------------
+      # Run your Jira script
+      # ----------------------------------------
       - name: Run Jira report script
         env:
           JIRA_USER: ${{ secrets.JIRA_USER }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python bug-resolved-30days-no-email.py
 
-      - name: Upload report artifact (optional)
+      # ----------------------------------------
+      # Upload artifact (optional)
+      # ----------------------------------------
+      - name: Upload report artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jira-report
           path: jira_report.json
 
+      # ----------------------------------------
+      # Fix invalid JSON (null → "")
+      # ----------------------------------------
       - name: Fix invalid JSON (convert null → "")
         run: |
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
+      # ----------------------------------------
+      # Commit JSON into reports/ for auditing
+      # ----------------------------------------
       - name: Commit JSON into /reports (timestamp + latest)
         env:
           TZ: UTC
@@ -68,10 +86,11 @@ jobs:
           git commit -m "Jira report: ${TS}" || echo "No changes to commit"
           git push || echo "No changes pushed"
 
-      # -----------------------------------------------------------
-      # NEW: SEND JSON TO TEAMS IN BATCHES OF 20 ISSUES (EXACT FORMAT PRESERVED)
-      # -----------------------------------------------------------
-      - name: Send issues to Teams in batches
+      # ----------------------------------------
+      # SEND ISSUES TO TEAMS IN BATCHES OF 20
+      # JSON FORMAT FULLY PRESERVED
+      # ----------------------------------------
+      - name: Send issues to Teams in batches (RAW JSON preserved)
         if: env.TEAMS_WEBHOOK_URL != ''
         run: |
           if [ -z "$TEAMS_WEBHOOK_URL" ]; then
@@ -79,7 +98,7 @@ jobs:
             exit 0
           fi
 
-          echo "Extracting issues..."
+          echo "Extracting issues array..."
           jq '.issues' jira_report.json > issues.json
 
           ISSUE_COUNT=$(jq 'length' issues.json)
@@ -94,27 +113,28 @@ jobs:
             END=$((i + BATCH_SIZE))
             BATCH_NUMBER=$(( (i / BATCH_SIZE) + 1 ))
 
-            echo "Preparing batch $BATCH_NUMBER of $TOTAL_BATCHES (issues $START to $END)"
+            echo "Preparing batch $BATCH_NUMBER of $TOTAL_BATCHES"
 
-            # Extract the issues slice
+            # Extract issues slice
             jq ".[$START:$END]" issues.json > issues_batch.json
 
-            # Build EXACT expected JSON structure:
-            # {
-            #   "issues": [ ... ]
-            # }
+            # Build EXACT JSON:
+            # { "issues": [...] }
             jq -n \
-              --slurpfile batch issues_batch.json \
-              '{ issues: $batch[0] }' > final_batch.json
+              --slurpfile items issues_batch.json \
+              '{ issues: $items[0] }' > final_batch.json
 
-            # Escape JSON for Teams text payload (Teams requires string)
-            BATCH_TEXT=$(jq -Rs '.' < final_batch.json)
+            # Load raw JSON (unescaped)
+            RAW_JSON=$(cat final_batch.json)
 
-            # Create Teams payload (text must be a string)
-            jq -n \
-              --arg txt "$BATCH_TEXT" \
-              '{ text: $txt }' \
-              > teams_payload.json
+            # Wrap JSON in Teams code block to prevent escaping
+            cat <<EOF > teams_payload.json
+{
+  "text": "Batch $BATCH_NUMBER/$TOTAL_BATCHES\n\`\`\`json
+$RAW_JSON
+\`\`\`"
+}
+EOF
 
             echo "Sending batch $BATCH_NUMBER to Teams..."
 
