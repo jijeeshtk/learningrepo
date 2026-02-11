@@ -15,7 +15,7 @@ jobs:
 
     env:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
-      # default batch size; can override via Actions variable
+      # You can override this in repo/Org variables without editing YAML
       BATCH_SIZE: 20
 
     steps:
@@ -83,74 +83,101 @@ jobs:
           # Extract issues array from full JSON
           jq '.issues' jira_report.json > issues.json
           COUNT=$(jq 'length' issues.json)
-          BATCH_SIZE="${BATCH_SIZE:-20}"
+          BASE_BATCH="${BATCH_SIZE:-20}"
 
           echo "Total issues: $COUNT"
-          echo "Target batch size: $BATCH_SIZE"
+          echo "Base batch size: $BASE_BATCH"
 
-          # Safety ceiling for webhook payload body (bytes) to avoid Teams truncation or rejection.
-          # We keep it conservative to account for overhead.
-          MAX_BYTES=27000
+          # Conservative ceiling in bytes for the webhook body to ensure Teams renders it.
+          # We keep room for code fences/header and webhook overhead.
+          MAX_BYTES=24000
 
-          send_range() {
-            local start="$1"
-            local end="$2"      # exclusive
-            local label="$3"    # label for context/logging
+          # Build and measure payload. If too big, caller will shrink count and try again.
+          build_payload() {
+            # Args: start end label pretty(1|0)
+            local start="$1" end="$2" label="$3" pretty="$4"
 
-            local cnt=$(( end - start ))
+            jq ".[$start:$end]" issues.json > /tmp/issues_slice.json
+            jq -n --slurpfile items /tmp/issues_slice.json '{ issues: $items[0] }' > /tmp/batch.json
 
-            # Slice issues and build EXACT JSON structure: { "issues": [...] }
-            jq ".[$start:$end]" issues.json > issues_slice.json
-            jq -n --slurpfile items issues_slice.json '{ issues: $items[0] }' > final_batch.json
-
-            # Pretty print (same as your working single-batch step)
-            jq '.' final_batch.json > pretty_batch.json
-
-            # Build Teams payload with a code block, using jq to avoid YAML/heredoc issues
-            jq -n \
-              --arg header "$label (issues $((start+1))..$end, count=$cnt)" \
-              --rawfile body pretty_batch.json \
-              '{ text: ($header + "\n" + "```" + "\n" + $body + "\n" + "```") }' > teams_payload.json
-
-            # If payload too large, split this range into two and send recursively
-            local size
-            size=$(wc -c < teams_payload.json | tr -d ' ')
-            if [ "$size" -gt "$MAX_BYTES" ] && [ "$cnt" -gt 1 ]; then
-              local mid=$(( start + (cnt/2) ))
-              echo "Payload too large (${size}B). Splitting $label into [$((start+1))..$mid] and [$((mid+1))..$end] ..."
-              send_range "$start" "$mid" "$label-A"
-              send_range "$mid" "$end" "$label-B"
-              return
+            if [ "$pretty" = "1" ]; then
+              jq '.' /tmp/batch.json > /tmp/body.json
+            else
+              jq -c '.' /tmp/batch.json > /tmp/body.json
             fi
 
-            # Send with simple retry/backoff; keep going even if one sub-send fails
+            # Build Teams payload with code block (same style as your single-batch)
+            jq -n \
+              --arg header "$label (issues $((start+1))..$end, count=$((end-start)))" \
+              --rawfile body /tmp/body.json \
+              '{ text: ($header + "\n" + "```" + "\n" + $body + "\n" + "```") }' > /tmp/teams_payload.json
+          }
+
+          # Send with small retry/backoff
+          send_payload() {
+            local label="$1"
+            local size
+            size=$(wc -c < /tmp/teams_payload.json | tr -d ' ')
             for attempt in 1 2 3; do
               http=$(curl -s -o /tmp/teams_resp.txt -w "%{http_code}" \
                 -H "Content-Type: application/json" \
-                -d @teams_payload.json \
+                -d @/tmp/teams_payload.json \
                 "$TEAMS_WEBHOOK_URL" || true)
 
               if [ "$http" -ge 200 ] && [ "$http" -lt 300 ]; then
                 echo "Delivered: $label (HTTP $http, ${size}B)"
                 return 0
               fi
-
               echo "WARN: Send failed for $label (HTTP $http). Attempt $attempt/3"
-              if [ "$http" = "429" ] || [ "$http" = "413" ]; then
-                # If throttled (429) or too large (413), split if possible
-                if [ "$cnt" -gt 1 ]; then
-                  local mid=$(( start + (cnt/2) ))
-                  echo "Splitting on failure ($http): $label → [$((start+1))..$mid] and [$((mid+1))..$end]"
-                  send_range "$start" "$mid" "$label-A"
-                  send_range "$mid" "$end" "$label-B"
+              sleep $((attempt * 2))
+            done
+            echo "ERROR: Failed to deliver $label after retries. Last HTTP: $http; Body:"
+            cat /tmp/teams_resp.txt || true
+            return 1
+          }
+
+          # Try to send a range; if too big, shrink by halving until it fits.
+          # If a single-issue pretty payload is still too big, fallback to compact.
+          send_range_with_shrink() {
+            local start="$1" end="$2" label="$3"
+            local cnt=$(( end - start ))
+            local local_size="$cnt"
+
+            while true; do
+              # 1) Build pretty JSON payload
+              build_payload "$start" "$end" "$label" 1
+              local size
+              size=$(wc -c < /tmp/teams_payload.json | tr -d ' ')
+
+              if [ "$size" -le "$MAX_BYTES" ]; then
+                send_payload "$label" && return 0 || return 1
+              fi
+
+              # 2) If pretty too big:
+              if [ "$cnt" -gt 1 ]; then
+                # shrink by half and try again
+                local mid=$(( start + (cnt/2) ))
+                echo "Payload too large (${size}B). Splitting $label into [$((start+1))..$mid] and [$((mid+1))..$end] ..."
+                send_range_with_shrink "$start" "$mid"  "$label-A" || true
+                send_range_with_shrink "$mid"   "$end"  "$label-B" || true
+                return 0
+              else
+                # cnt == 1: fallback to COMPACT JSON for this single issue
+                echo "Single-issue payload too large in pretty form (${size}B). Falling back to COMPACT for $label."
+                build_payload "$start" "$end" "$label" 0
+                size=$(wc -c < /tmp/teams_payload.json | tr -d ' ')
+                if [ "$size" -le "$MAX_BYTES" ]; then
+                  send_payload "$label" || true
+                  return 0
+                else
+                  echo "ERROR: Single issue still exceeds size after compact (${size}B). Truncating text as a last resort."
+                  # last resort: send a tiny notice instead of losing the batch
+                  jq -n --arg txt "$label: payload exceeded size. Please check the artifact/reports in repo." '{ text: $txt }' > /tmp/teams_payload.json
+                  send_payload "$label (truncated)" || true
                   return 0
                 fi
               fi
-              sleep $(( attempt * 2 ))
             done
-
-            echo "ERROR: Failed to deliver $label after retries. HTTP=$(cat /tmp/teams_resp.txt)"
-            return 1
           }
 
           if [ "$COUNT" -eq 0 ]; then
@@ -158,17 +185,21 @@ jobs:
             exit 0
           fi
 
-          # Primary batching by fixed issue count, with auto-split if any batch is too large
-          total_batches=$(( (COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
-          b=1
+          # Main loop: send in base batches; any batch too big will be auto‑split
+          total_batches=$(( (COUNT + BASE_BATCH - 1) / BASE_BATCH ))
           idx=0
+          b=1
           while [ "$idx" -lt "$COUNT" ]; do
-            end=$(( idx + BATCH_SIZE ))
+            end=$(( idx + BASE_BATCH ))
             if [ "$end" -gt "$COUNT" ]; then end="$COUNT"; fi
+
             label="Batch $b/$total_batches"
             echo "Preparing $label (issues $((idx+1))..$end)"
-            # send_range may split internally if payload exceeds size
-            send_range "$idx" "$end" "$label" || true
+            send_range_with_shrink "$idx" "$end" "$label" || true
+
+            # small delay to reduce chance of throttling
+            sleep 1
+
             idx="$end"
             b=$(( b + 1 ))
           done
