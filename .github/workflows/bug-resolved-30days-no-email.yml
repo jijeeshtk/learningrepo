@@ -38,28 +38,19 @@ jobs:
 
       - name: Fix invalid JSON (convert null → "")
         run: |
-          jq 'walk(
-                if type == "object"
-                then with_entries(.value |= (if . == null then "" else . end))
-                else .
-                end
-              )' jira_report.json > fixed.json
-
+          # Replace all nulls anywhere in the document with empty strings.
+          # Uses the recursive descent operator (..) so we don't need walk().
+          jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
       - name: Prepare pretty JSON for Teams text block
         run: |
-          # Pretty print JSON
-          PRETTY_JSON=$(jq '.' jira_report.json)
+          # Pretty print the JSON to a separate file
+          jq '.' jira_report.json > pretty.json
 
-          # Create code block WITHOUT using backticks in YAML
-          MESSAGE="\\\`\\\`\\\`
-$PRETTY_JSON
-\\\`\\\`\\\`"
-
-          # Build Teams payload
-          jq -n --arg text "$MESSAGE" \
-            '{text: $text}' > payload.json
+          # Build Teams payload IN jq to avoid YAML/backtick quoting issues
+          jq -n --rawfile body pretty.json \
+            '{text: ("```\n" + $body + "\n```")}' > payload.json
 
       - name: Send to Microsoft Teams
         run: |
