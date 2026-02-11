@@ -13,6 +13,10 @@ jobs:
   jira-report:
     runs-on: ubuntu-latest
 
+    # Expose the secret as an environment variable so we can use env.* in expressions
+    env:
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -60,13 +64,11 @@ jobs:
           cp jira_report.json "reports/jira_report_${TS}.json"
           cp jira_report.json "reports/jira_report_latest.json"
 
-          # Configure Git and commit only if there are changes
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add reports/jira_report_${TS}.json reports/jira_report_latest.json
 
-          # If nothing to commit for 'latest', the new timestamped file still creates a new commit
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
@@ -74,7 +76,7 @@ jobs:
             git push
           fi
 
-      # --- Optional: send formatted JSON to Teams (this stays, separate from Power Automate) ---
+      # --- Optional: send formatted JSON to Teams (plain-text code block) ---
       - name: Prepare pretty JSON for Teams text block
         run: |
           jq '.' jira_report.json > pretty.json
@@ -82,8 +84,13 @@ jobs:
             '{text: ("```\n" + $body + "\n```")}' > payload.json
 
       - name: Send to Microsoft Teams
-        if: ${{ secrets.TEAMS_WEBHOOK_URL != '' }}
+        if: env.TEAMS_WEBHOOK_URL != ''
         run: |
+          if [ -z "$TEAMS_WEBHOOK_URL" ]; then
+            echo "TEAMS_WEBHOOK_URL not set; skipping Teams notification."
+            exit 0
+          fi
+
           curl -H "Content-Type: application/json" \
                -d @payload.json \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"
+               "$TEAMS_WEBHOOK_URL"
