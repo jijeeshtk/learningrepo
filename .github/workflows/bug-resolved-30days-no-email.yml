@@ -36,32 +36,35 @@ jobs:
           name: jira-report
           path: jira_report.json
 
-      - name: Send pretty JSON to Teams as plain code block
+      - name: Send JSON to Teams (safe plain text)
         shell: bash
         run: |
-          # Fix invalid JSON
+          # Fix invalid JSON fields:  "field":,
           sed -i 's/":,/"":/g' jira_report.json
 
           # Validate JSON
-          if ! jq empty jira_report.json 2>/dev/null; then
-            SAFE_JSON='{"error":"Invalid JSON"}'
+          if jq empty jira_report.json 2>/dev/null; then
+            SAFE_JSON=$(jq -c '.' jira_report.json)
           else
-            SAFE_JSON=$(jq '.' jira_report.json)
+            SAFE_JSON='{"error":"invalid json"}'
           fi
 
-          # Wrap in code block
+          # Wrap inside code block (Teams markdown)
           WRAPPED="```json
 $SAFE_JSON
 ```"
 
-          # Fallback if too large
-          if [ $(echo -n "$WRAPPED" | wc -c) -gt 25000 ]; then
+          # If too big for Teams (~25KB), fallback to minified only
+          SIZE=$(echo -n "$WRAPPED" | wc -c)
+          if [ "$SIZE" -gt 25000 ]; then
             SAFE_JSON=$(jq -c '.' jira_report.json)
             WRAPPED="$SAFE_JSON"
           fi
 
+          # Build final JSON payload safely
           PAYLOAD=$(jq -n --arg text "$WRAPPED" '{text: $text}')
 
+          # Send to Teams
           curl -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
