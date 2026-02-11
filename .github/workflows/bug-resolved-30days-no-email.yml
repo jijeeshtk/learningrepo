@@ -2,8 +2,8 @@ name: Bug resolved report
 
 on:
   schedule:
-    - cron: "0 */12 * * *"   # every 12 hours
-  workflow_dispatch:          # manual trigger
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
 
 jobs:
   jira-report:
@@ -19,7 +19,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          pip install requests
 
       - name: Run Jira report script
         env:
@@ -39,18 +42,19 @@ jobs:
           # Fix invalid JSON
           sed -i 's/":,/"":/g' jira_report.json
 
-          # Validate or fallback
+          # Validate JSON
           if ! jq empty jira_report.json 2>/dev/null; then
             SAFE_JSON='{"error":"Invalid JSON"}'
           else
             SAFE_JSON=$(jq '.' jira_report.json)
           fi
 
+          # Wrap in code block
           WRAPPED="```json
 $SAFE_JSON
 ```"
 
-          # If payload too large → fallback to minified JSON
+          # Fallback if too large
           if [ $(echo -n "$WRAPPED" | wc -c) -gt 25000 ]; then
             SAFE_JSON=$(jq -c '.' jira_report.json)
             WRAPPED="$SAFE_JSON"
