@@ -2,8 +2,8 @@ name: Bug resolved report
 
 on:
   schedule:
-    - cron: "0 */12 * * *"   # run 12 hours
-  workflow_dispatch:       # allow manual trigger
+    - cron: "0 */12 * * *"   # every 12 hours
+  workflow_dispatch:          # manual trigger
 
 jobs:
   jira-report:
@@ -11,12 +11,12 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.14"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install requests
@@ -32,3 +32,9 @@ jobs:
         with:
           name: jira-report
           path: jira_report.json
+
+      - name: Notify Teams (simple text)
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d "{\"text\": \"Bug report generated: jira_report.json (artifact uploaded).\"}" \
+               ${{ secrets.TEAMS_WEBHOOK_URL }}
