@@ -9,7 +9,7 @@ JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 
 # JQL
-JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -48h'
+JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -6h'
 
 def fetch_jira_issues():
     url = f"{JIRA_URL}/rest/api/3/search/jql"
@@ -128,6 +128,7 @@ if __name__ == "__main__":
         f.write(report)
 
     print("Report generated: jira_report.json")
+
 
 
 
