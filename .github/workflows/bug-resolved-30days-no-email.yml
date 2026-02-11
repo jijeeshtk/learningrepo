@@ -25,7 +25,7 @@ jobs:
         env:
           JIRA_USER: ${{ secrets.JIRA_USER }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: bug-resolved-30days-no-email.py
+        run: python bug-resolved-30days-no-email.py
 
       - name: Upload report artifact
         uses: actions/upload-artifact@v4
