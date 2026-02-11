@@ -2,13 +2,12 @@ name: Bug resolved report
 
 on:
   schedule:
-    - cron: "0 */12 * * *"   # every 12 hours
-  workflow_dispatch:          # manual trigger
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
 
 jobs:
   jira-report:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -33,16 +32,19 @@ jobs:
           name: jira-report
           path: jira_report.json
 
-      - name: Send Plain JSON to Teams (minified)
+      - name: Send pretty JSON to Teams as code block (fallback to minified if large)
         shell: bash
         run: |
-          # Minify JSON so Teams accepts it (removes pretty-print spacing)
-          MINIFIED=$(jq -c '.' jira_report.json)
-
-          # Escape double quotes to avoid breaking JSON payload
-          ESCAPED=$(printf '%s' "$MINIFIED" | sed 's/"/\\"/g')
-
-          # Send plain text JSON to Teams
+          PRETTY=$(jq '.' jira_report.json)
+          WRAPPED="```json
+$PRETTY
+```"
+          PAYLOAD=$(jq -n --arg text "$WRAPPED" '{text: $text}')
+          if [ $(echo -n "$WRAPPED" | wc -c) -gt 25000 ]; then
+            echo "Pretty JSON too large; falling back to minified."
+            MINIFIED=$(jq -c '.' jira_report.json)
+            PAYLOAD=$(jq -n --arg text "$MINIFIED" '{text: $text}')
+          fi
           curl -H "Content-Type: application/json" \
-               -d "{\"text\": \"${ESCAPED}\"}" \
+               -d "$PAYLOAD" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
