@@ -15,14 +15,10 @@ jobs:
 
     env:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
-      # Override without editing YAML if needed
-      BATCH_SIZE: 20
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -41,165 +37,78 @@ jobs:
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python bug-resolved-30days-no-email.py
 
-      - name: Upload report artifact (optional)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jira-report
-          path: jira_report.json
-
       - name: Normalize JSON (null → "")
         run: |
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
-      - name: Commit JSON into /reports (audit)
-        env:
-          TZ: UTC
+      - name: Commit JSON for audit
         run: |
           TS=$(date -u +%Y-%m-%dT%H%M%SZ)
           mkdir -p reports
-          cp jira_report.json "reports/jira_report_${TS}.json"
-          cp jira_report.json "reports/jira_report_latest.json"
+          cp jira_report.json reports/jira_report_${TS}.json
+          cp jira_report.json reports/jira_report_latest.json
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add reports/jira_report_${TS}.json reports/jira_report_latest.json
-          git commit -m "Jira report: ${TS}" || true
+          git commit -m "Jira report updated ${TS}" || true
           git push || true
 
-      - name: Send issues to Teams (adaptive split + pretty code block)
+      - name: Send issues to Teams in batches (fixed)
         if: env.TEAMS_WEBHOOK_URL != ''
         shell: bash
         run: |
           set -euo pipefail
 
-          if [ -z "${TEAMS_WEBHOOK_URL:-}" ]; then
-            echo "TEAMS_WEBHOOK_URL not set; skipping Teams send."
-            exit 0
-          fi
+          BATCH_SIZE=20
 
-          # Extract issues array
           jq '.issues' jira_report.json > /tmp/issues.json
-          COUNT=$(jq 'length' /tmp/issues.json)
-          BASE_BATCH="${BATCH_SIZE:-20}"
+          TOTAL=$(jq 'length' /tmp/issues.json)
 
-          echo "Total issues : $COUNT"
-          echo "Base batch   : $BASE_BATCH"
+          echo "Total issues=${TOTAL}"
 
-          # Conservative ceiling for webhook body size (bytes).
-          # This keeps headroom for Teams markup and avoids "too long to display" drops.
-          MAX_BYTES=24000
-
-          build_payload() {
-            # Args: start end label pretty(1|0)
-            local start="$1" end="$2" label="$3" pretty="$4"
-
-            jq ".[$start:$end]" /tmp/issues.json > /tmp/issues_slice.json
-            jq -n --slurpfile items /tmp/issues_slice.json '{ issues: $items[0] }' > /tmp/batch.json
-
-            if [ "$pretty" = "1" ]; then
-              jq '.' /tmp/batch.json > /tmp/body.json
-            else
-              jq -c '.' /tmp/batch.json > /tmp/body.json
-            fi
-
-            # Build Teams payload with code block (exactly like your single-batch pattern)
-            jq -n \
-              --arg header "$label (items $((start+1))..$end, count=$((end-start)))" \
-              --rawfile body /tmp/body.json \
-              '{ text: ($header + "\n" + "```" + "\n" + $body + "\n" + "```") }' > /tmp/teams_payload.json
-          }
-
-          send_payload() {
-            local label="$1"
-            local size
-            size=$(wc -c < /tmp/teams_payload.json | tr -d ' ')
-
-            # Retry w/ backoff for transient issues (429, etc.)
-            for attempt in 1 2 3; do
-              http=$(curl -s -o /tmp/teams_resp.txt -w "%{http_code}" \
-                -H "Content-Type: application/json" \
-                -d @/tmp/teams_payload.json \
-                "$TEAMS_WEBHOOK_URL" || true)
-
-              if [ "$http" -ge 200 ] && [ "$http" -lt 300 ]; then
-                echo "Delivered: $label (HTTP $http, ${size}B)"
-                return 0
-              fi
-              echo "WARN: Failed $label (HTTP $http). Attempt $attempt/3"
-              sleep $((attempt * 2))
-            done
-
-            echo "ERROR: Could not deliver $label after retries. Last HTTP=$http"
-            cat /tmp/teams_resp.txt || true
-            return 1
-          }
-
-          # Try to send range; if too big, split (20→10→5→…) before sending.
-          # If a single issue pretty payload is still too big, fallback to compact.
-          send_range_with_shrink() {
-            local start="$1" end="$2" label="$3"
-            local cnt=$(( end - start ))
-
-            # 1) Build PRETTY payload and measure size
-            build_payload "$start" "$end" "$label" 1
-            local size
-            size=$(wc -c < /tmp/teams_payload.json | tr -d ' ')
-
-            if [ "$size" -le "$MAX_BYTES" ]; then
-              send_payload "$label" || true
-              return 0
-            fi
-
-            # 2) If too large and >1 item, split before sending
-            if [ "$cnt" -gt 1 ]; then
-              local mid=$(( start + (cnt/2) ))
-              echo "Too large (${size}B). Splitting $label into [$((start+1))..$mid] and [$((mid+1))..$end] ..."
-              send_range_with_shrink "$start" "$mid"  "$label-A" || true
-              send_range_with_shrink "$mid"   "$end"  "$label-B" || true
-              return 0
-            fi
-
-            # 3) Single issue still too large in PRETTY → fallback to COMPACT
-            echo "Single item too large pretty (${size}B). Falling back to COMPACT for $label."
-            build_payload "$start" "$end" "$label" 0
-            size=$(wc -c < /tmp/teams_payload.json | tr -d ' ')
-            if [ "$size" -le "$MAX_BYTES" ]; then
-              send_payload "$label" || true
-              return 0
-            fi
-
-            # 4) Last resort: send a tiny notice so batch isn't silently missing
-            echo "Still too large after compact (${size}B). Sending notice for $label."
-            jq -n --arg t "$label exceeded size; see repo reports for JSON." '{ text: $t }' > /tmp/teams_payload.json
-            send_payload "$label (notice)" || true
-            return 0
-          }
-
-          if [ "$COUNT" -eq 0 ]; then
+          if [ "$TOTAL" -eq 0 ]; then
             echo "No issues to send."
             exit 0
           fi
 
-          total_batches=$(( (COUNT + BASE_BATCH - 1) / BASE_BATCH ))
-          idx=0
-          b=1
-          while [ "$idx" -lt "$COUNT" ]; do
-            end=$(( idx + BASE_BATCH ))
-            if [ "$end" -gt "$COUNT" ]; then end="$COUNT"; fi
-            label="Batch $b/$total_batches"
+          # Send batches of 20 issues each
+          start=0
+          batch=1
+          total_batches=$(( (TOTAL + BATCH_SIZE - 1) / BATCH_SIZE ))
 
-            echo "Preparing $label (items $((idx+1))..$end)"
-            # This function will auto-split further *before* sending if needed
-            send_range_with_shrink "$idx" "$end" "$label" || true
+          while [ "$start" -lt "$TOTAL" ]; do
+            end=$(( start + BATCH_SIZE ))
+            if [ "$end" -gt "$TOTAL" ]; then
+              end="$TOTAL"
+            fi
 
-            # Small delay between sends helps avoid 429 throttling
+            echo "Preparing Batch $batch/$total_batches (items $((start+1))..$end)"
+
+            # Create batch JSON: { "issues": [...] }
+            jq ".[$start:$end]" /tmp/issues.json > /tmp/slice.json
+            jq -n --slurpfile s /tmp/slice.json '{ issues: $s[0] }' > /tmp/batch.json
+
+            # Pretty print (exactly like your working single-batch step)
+            jq '.' /tmp/batch.json > /tmp/pretty.json
+
+            # Add header BEFORE code block (this is what makes Batch 1 always render)
+            jq -n \
+              --arg header "Batch $batch/$total_batches" \
+              --rawfile body /tmp/pretty.json \
+              '{text: ($header + "\n```json\n" + $body + "\n```")}' \
+              > /tmp/payload.json
+
+            echo "Sending Batch $batch/$total_batches"
+            curl -sS -H "Content-Type: application/json" \
+                 -d @/tmp/payload.json \
+                 "$TEAMS_WEBHOOK_URL"
+
             sleep 1
-
-            idx="$end"
-            b=$(( b + 1 ))
+            start="$end"
+            batch=$(( batch + 1 ))
           done
 
-          echo "All batches attempted."
+          echo "All batches sent."
