@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # allow pushing commits
+  contents: write
   actions: read
 
 jobs:
@@ -51,12 +51,10 @@ jobs:
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
-      # --- Commit JSON into /reports for archival ---
       - name: Commit JSON into /reports (timestamp + latest)
         env:
           TZ: UTC
         run: |
-          set -e
           TS=$(date -u +%Y-%m-%dT%H%M%SZ)
           mkdir -p reports
           cp jira_report.json "reports/jira_report_${TS}.json"
@@ -67,14 +65,12 @@ jobs:
 
           git add reports/jira_report_${TS}.json reports/jira_report_latest.json
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Jira report: ${TS}"
-            git push
-          fi
+          git commit -m "Jira report: ${TS}" || echo "No changes to commit"
+          git push || echo "No changes pushed"
 
-      # --- Send JSON to Teams in batches of 20 issues ---
+      # -----------------------------------------------------------
+      # NEW: SEND JSON TO TEAMS IN BATCHES OF 20 ISSUES (EXACT FORMAT PRESERVED)
+      # -----------------------------------------------------------
       - name: Send issues to Teams in batches
         if: env.TEAMS_WEBHOOK_URL != ''
         run: |
@@ -100,31 +96,32 @@ jobs:
 
             echo "Preparing batch $BATCH_NUMBER of $TOTAL_BATCHES (issues $START to $END)"
 
-            # Extract slice of issues
+            # Extract the issues slice
             jq ".[$START:$END]" issues.json > issues_batch.json
 
-            # Build clean JSON payload per batch
+            # Build EXACT expected JSON structure:
+            # {
+            #   "issues": [ ... ]
+            # }
             jq -n \
-              --arg marker "GITHUB_JIRA_REPORT" \
-              --arg batch "$BATCH_NUMBER" \
-              --arg total "$TOTAL_BATCHES" \
-              --slurpfile items issues_batch.json \
-              '{
-                batch: ($batch | tonumber),
-                total_batches: ($total | tonumber),
-                issues: $items[0]
-              }' > batch_payload.json
+              --slurpfile batch issues_batch.json \
+              '{ issues: $batch[0] }' > final_batch.json
+
+            # Escape JSON for Teams text payload (Teams requires string)
+            BATCH_TEXT=$(jq -Rs '.' < final_batch.json)
+
+            # Create Teams payload (text must be a string)
+            jq -n \
+              --arg txt "$BATCH_TEXT" \
+              '{ text: $txt }' \
+              > teams_payload.json
 
             echo "Sending batch $BATCH_NUMBER to Teams..."
-
-            jq -n \
-              --rawfile body batch_payload.json \
-              '{text: $body}' \
-              > teams_payload.json
 
             curl -H "Content-Type: application/json" \
                  -d @teams_payload.json \
                  "$TEAMS_WEBHOOK_URL"
+
           done
 
-          echo "All Teams batches sent successfully!"
+          echo "All issue batches sent to Teams successfully!"
