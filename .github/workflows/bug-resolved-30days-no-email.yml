@@ -51,7 +51,7 @@ jobs:
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
-      # Commit JSON into /reports
+      # --- Commit JSON into /reports for archival ---
       - name: Commit JSON into /reports (timestamp + latest)
         env:
           TZ: UTC
@@ -74,8 +74,8 @@ jobs:
             git push
           fi
 
-      # Send JSON to Teams in CHUNKS
-      - name: Send chunked JSON to Teams
+      # --- Send JSON to Teams in batches of 20 issues ---
+      - name: Send issues to Teams in batches
         if: env.TEAMS_WEBHOOK_URL != ''
         run: |
           if [ -z "$TEAMS_WEBHOOK_URL" ]; then
@@ -83,34 +83,48 @@ jobs:
             exit 0
           fi
 
-          echo "Compacting JSON..."
-          jq -c '.' jira_report.json > compact.json
+          echo "Extracting issues..."
+          jq '.issues' jira_report.json > issues.json
 
-          echo "Splitting JSON into 25KB chunks..."
-          split -b 25000 compact.json chunk_
+          ISSUE_COUNT=$(jq 'length' issues.json)
+          echo "Total issues: $ISSUE_COUNT"
 
-          CHUNK_COUNT=$(ls chunk_* | wc -l)
-          echo "Total chunks: $CHUNK_COUNT"
+          BATCH_SIZE=20
+          TOTAL_BATCHES=$(( (ISSUE_COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
+          echo "Total batches: $TOTAL_BATCHES"
 
-          i=1
-          for chunk in chunk_*; do
-            CONTENT=$(cat "$chunk")
+          for ((i=0; i<ISSUE_COUNT; i+=BATCH_SIZE)); do
+            START=$i
+            END=$((i + BATCH_SIZE))
+            BATCH_NUMBER=$(( (i / BATCH_SIZE) + 1 ))
 
-            echo "Sending CHUNK $i of $CHUNK_COUNT to Teams..."
+            echo "Preparing batch $BATCH_NUMBER of $TOTAL_BATCHES (issues $START to $END)"
 
+            # Extract slice of issues
+            jq ".[$START:$END]" issues.json > issues_batch.json
+
+            # Build clean JSON payload per batch
             jq -n \
               --arg marker "GITHUB_JIRA_REPORT" \
-              --arg part "$i" \
-              --arg total "$CHUNK_COUNT" \
-              --arg data "$CONTENT" \
-              '{text: ($marker + "\nCHUNK " + $part + "/" + $total + "\n" + $data)}' \
-              > payload.json
+              --arg batch "$BATCH_NUMBER" \
+              --arg total "$TOTAL_BATCHES" \
+              --slurpfile items issues_batch.json \
+              '{
+                batch: ($batch | tonumber),
+                total_batches: ($total | tonumber),
+                issues: $items[0]
+              }' > batch_payload.json
+
+            echo "Sending batch $BATCH_NUMBER to Teams..."
+
+            jq -n \
+              --rawfile body batch_payload.json \
+              '{text: $body}' \
+              > teams_payload.json
 
             curl -H "Content-Type: application/json" \
-                 -d @payload.json \
+                 -d @teams_payload.json \
                  "$TEAMS_WEBHOOK_URL"
-
-            i=$((i+1))
           done
 
-          echo "All chunks successfully sent to Teams!"
+          echo "All Teams batches sent successfully!"
