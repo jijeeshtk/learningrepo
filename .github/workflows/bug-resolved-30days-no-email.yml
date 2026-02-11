@@ -2,12 +2,13 @@ name: Bug resolved report
 
 on:
   schedule:
-    - cron: "0 */12 * * *"
+    - cron: "0 */12 * * *"   # every 12 hours
   workflow_dispatch:
 
 jobs:
   jira-report:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -32,19 +33,36 @@ jobs:
           name: jira-report
           path: jira_report.json
 
-      - name: Send pretty JSON to Teams as code block (fallback to minified if large)
+      - name: Send pretty JSON to Teams as code block (safe mode)
         shell: bash
         run: |
-          PRETTY=$(jq '.' jira_report.json)
-          WRAPPED="```json
-$PRETTY
-```"
-          PAYLOAD=$(jq -n --arg text "$WRAPPED" '{text: $text}')
-          if [ $(echo -n "$WRAPPED" | wc -c) -gt 25000 ]; then
-            echo "Pretty JSON too large; falling back to minified."
-            MINIFIED=$(jq -c '.' jira_report.json)
-            PAYLOAD=$(jq -n --arg text "$MINIFIED" '{text: $text}')
+          # Step 1 — Fix invalid JSON artifacts
+          sed -i 's/":,/"":/g' jira_report.json
+
+          # Step 2 — Validate JSON or fallback
+          if ! jq empty jira_report.json 2>/dev/null; then
+            echo "Invalid JSON — fallback used"
+            SAFE_JSON='{"error": "Invalid JSON generated"}'
+          else
+            SAFE_JSON=$(jq '.' jira_report.json)
           fi
+
+          # Step 3 — Wrap inside JSON code block
+          WRAPPED="```json
+$SAFE_JSON
+```"
+
+          # Step 4 — Check Teams limit (approx 25 KB)
+          if [ $(echo -n "$WRAPPED" | wc -c) -gt 25000 ]; then
+            echo "Pretty JSON too large — using minified JSON"
+            SAFE_JSON=$(jq -c '.' jira_report.json)
+            WRAPPED="$SAFE_JSON"
+          fi
+
+          # Step 5 — Build safe JSON payload
+          PAYLOAD=$(jq -n --arg text "$WRAPPED" '{text: $text}')
+
+          # Step 6 — Send to Teams webhook
           curl -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
