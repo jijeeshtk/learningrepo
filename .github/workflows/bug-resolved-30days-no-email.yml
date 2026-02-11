@@ -13,7 +13,6 @@ jobs:
   jira-report:
     runs-on: ubuntu-latest
 
-    # Expose the secret as an environment variable so we can use env.* in expressions
     env:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
@@ -49,11 +48,10 @@ jobs:
 
       - name: Fix invalid JSON (convert null → "")
         run: |
-          # Replace all nulls anywhere in the document with empty strings.
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
-      # --- Commit JSON into the repository so Power Automate GitHub connector can trigger ---
+      # Commit JSON into /reports
       - name: Commit JSON into /reports (timestamp + latest)
         env:
           TZ: UTC
@@ -76,21 +74,43 @@ jobs:
             git push
           fi
 
-      # --- Optional: send formatted JSON to Teams (plain-text code block) ---
-      - name: Prepare pretty JSON for Teams text block
-        run: |
-          jq '.' jira_report.json > pretty.json
-          jq -n --rawfile body pretty.json \
-            '{text: ("```\n" + $body + "\n```")}' > payload.json
-
-      - name: Send to Microsoft Teams
+      # Send JSON to Teams in CHUNKS
+      - name: Send chunked JSON to Teams
         if: env.TEAMS_WEBHOOK_URL != ''
         run: |
           if [ -z "$TEAMS_WEBHOOK_URL" ]; then
-            echo "TEAMS_WEBHOOK_URL not set; skipping Teams notification."
+            echo "TEAMS_WEBHOOK_URL not set; skipping Teams send."
             exit 0
           fi
 
-          curl -H "Content-Type: application/json" \
-               -d @payload.json \
-               "$TEAMS_WEBHOOK_URL"
+          echo "Compacting JSON..."
+          jq -c '.' jira_report.json > compact.json
+
+          echo "Splitting JSON into 25KB chunks..."
+          split -b 25000 compact.json chunk_
+
+          CHUNK_COUNT=$(ls chunk_* | wc -l)
+          echo "Total chunks: $CHUNK_COUNT"
+
+          i=1
+          for chunk in chunk_*; do
+            CONTENT=$(cat "$chunk")
+
+            echo "Sending CHUNK $i of $CHUNK_COUNT to Teams..."
+
+            jq -n \
+              --arg marker "GITHUB_JIRA_REPORT" \
+              --arg part "$i" \
+              --arg total "$CHUNK_COUNT" \
+              --arg data "$CONTENT" \
+              '{text: ($marker + "\nCHUNK " + $part + "/" + $total + "\n" + $data)}' \
+              > payload.json
+
+            curl -H "Content-Type: application/json" \
+                 -d @payload.json \
+                 "$TEAMS_WEBHOOK_URL"
+
+            i=$((i+1))
+          done
+
+          echo "All chunks successfully sent to Teams!"
