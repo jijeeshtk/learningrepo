@@ -52,10 +52,12 @@ jobs:
           # Pretty-print JSON so Teams shows it cleanly
           PRETTY_JSON=$(jq '.' jira_report.json)
 
-          # Wrap JSON inside triple-backtick code block so Teams formats it
-          MESSAGE="```\n$PRETTY_JSON\n```"
+          # Wrap JSON in code block for Teams
+          MESSAGE="```
+$PRETTY_JSON
+```"
 
-          # Build payload
+          # Build JSON payload safely
           jq -n --arg text "$MESSAGE" '{text: $text}' > payload.json
 
       - name: Send to Microsoft Teams
