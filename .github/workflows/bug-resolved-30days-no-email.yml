@@ -5,6 +5,10 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write   # allow pushing commits
+  actions: read
+
 jobs:
   jira-report:
     runs-on: ubuntu-latest
@@ -12,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -30,7 +36,8 @@ jobs:
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python bug-resolved-30days-no-email.py
 
-      - name: Upload report artifact
+      - name: Upload report artifact (optional)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jira-report
@@ -39,20 +46,43 @@ jobs:
       - name: Fix invalid JSON (convert null → "")
         run: |
           # Replace all nulls anywhere in the document with empty strings.
-          # Uses the recursive descent operator (..) so we don't need walk().
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
+      # --- Commit JSON into the repository so Power Automate GitHub connector can trigger ---
+      - name: Commit JSON into /reports (timestamp + latest)
+        env:
+          TZ: UTC
+        run: |
+          set -e
+          TS=$(date -u +%Y-%m-%dT%H%M%SZ)
+          mkdir -p reports
+          cp jira_report.json "reports/jira_report_${TS}.json"
+          cp jira_report.json "reports/jira_report_latest.json"
+
+          # Configure Git and commit only if there are changes
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add reports/jira_report_${TS}.json reports/jira_report_latest.json
+
+          # If nothing to commit for 'latest', the new timestamped file still creates a new commit
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Jira report: ${TS}"
+            git push
+          fi
+
+      # --- Optional: send formatted JSON to Teams (this stays, separate from Power Automate) ---
       - name: Prepare pretty JSON for Teams text block
         run: |
-          # Pretty print the JSON to a separate file
           jq '.' jira_report.json > pretty.json
-
-          # Build Teams payload IN jq to avoid YAML/backtick quoting issues
           jq -n --rawfile body pretty.json \
             '{text: ("```\n" + $body + "\n```")}' > payload.json
 
       - name: Send to Microsoft Teams
+        if: ${{ secrets.TEAMS_WEBHOOK_URL != '' }}
         run: |
           curl -H "Content-Type: application/json" \
                -d @payload.json \
