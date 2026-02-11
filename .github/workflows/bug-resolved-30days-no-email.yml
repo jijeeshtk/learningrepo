@@ -36,22 +36,30 @@ jobs:
           name: jira-report
           path: jira_report.json
 
-      - name: Send JSON report to Teams (plain text)
-        shell: bash
+      - name: Fix invalid or missing JSON fields
         run: |
-          # Fix invalid JSON
-          sed -i 's/":,/"":/g' jira_report.json
+          # Convert all null or missing values to ""
+          jq 'walk(
+                if type == "object"
+                then with_entries(.value |= (if . == null then "" else . end))
+                else .
+                end
+              )' jira_report.json > fixed.json
 
-          # Validate JSON
-          if jq empty jira_report.json 2>/dev/null; then
-            SAFE_JSON=$(jq -c '.' jira_report.json)
-          else
-            SAFE_JSON='{"error":"invalid json"}'
-          fi
+          mv fixed.json jira_report.json
 
-          # Build simple payload (NO code block to avoid YAML escapes)
+      - name: Prepare JSON for Teams
+        run: |
+          # Pretty-print for Teams text card
+          SAFE_JSON=$(jq '.' jira_report.json)
+
+          # Construct simple Teams message
           PAYLOAD=$(jq -n --arg text "$SAFE_JSON" '{text: $text}')
 
+          echo "$PAYLOAD" > payload.json
+
+      - name: Send to Microsoft Teams
+        run: |
           curl -H "Content-Type: application/json" \
-               -d "$PAYLOAD" \
+               -d @payload.json \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
