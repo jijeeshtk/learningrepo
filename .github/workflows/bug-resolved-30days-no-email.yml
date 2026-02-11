@@ -56,60 +56,62 @@ jobs:
           git commit -m "Jira report updated ${TS}" || true
           git push || true
 
-      - name: Send issues to Teams (with warm-up fix)
+      - name: Send issues to Teams in batches of 15 (pretty JSON + code block)
         if: env.TEAMS_WEBHOOK_URL != ''
         shell: bash
         run: |
           set -euo pipefail
 
           if [ -z "${TEAMS_WEBHOOK_URL:-}" ]; then
-            echo "Webhook not set; skipping."
+            echo "Webhook not set; skipping Teams."
             exit 0
           fi
 
-          # Load issues
           jq '.issues' jira_report.json > /tmp/issues.json
           TOTAL=$(jq 'length' /tmp/issues.json)
-          BATCH_SIZE=20
+          BATCH_SIZE=15
           TOTAL_BATCHES=$(( (TOTAL + BATCH_SIZE - 1) / BATCH_SIZE ))
 
           echo "Total issues: $TOTAL"
-          echo "Sending in $TOTAL_BATCHES batch(es)"
+          echo "Batch size  : $BATCH_SIZE"
+          echo "Batches     : $TOTAL_BATCHES"
 
-          # ------------------------------
-          # 🔥 WARM-UP FIX FOR TEAMS BUG
-          # ------------------------------
-          echo '{"text":"Initializing Jira report delivery..."}' > /tmp/ping.json
-          curl -sS -H "Content-Type: application/json" -d @/tmp/ping.json "$TEAMS_WEBHOOK_URL"
-          sleep 5     # ⭐ WAIT BEFORE SENDING BATCH 1
-
-          # ------------------------------
-          # SEND BATCHES
-          # ------------------------------
           index=0
           batch=1
 
           while [ "$index" -lt "$TOTAL" ]; do
+
             end=$(( index + BATCH_SIZE ))
             if [ "$end" -gt "$TOTAL" ]; then end="$TOTAL"; fi
 
-            jq ".[$index:$end]" /tmp/issues.json > /tmp/slice.json
-            jq -n --slurpfile s /tmp/slice.json '{ issues: $s[0] }' > /tmp/batch.json
-            jq '.' /tmp/batch.json > /tmp/pretty.json   # pretty-print like your old working one
+            echo "Preparing Batch $batch/$TOTAL_BATCHES (items $((index+1))..$end)"
 
+            # Slice issues → tmp/issues_batch.json
+            jq ".[$index:$end]" /tmp/issues.json > /tmp/issues_batch.json
+
+            # Build exact structure { "issues": [...] }
+            jq -n --slurpfile s /tmp/issues_batch.json '{ issues: $s[0] }' > /tmp/batch.json
+
+            # Pretty print EXACTLY like your single working version
+            jq '.' /tmp/batch.json > /tmp/pretty.json
+
+            # Build Teams payload → header + code block + pretty JSON
             jq -n \
               --arg header "Batch $batch/$TOTAL_BATCHES (items $((index+1))..$end)" \
               --rawfile body /tmp/pretty.json \
               '{ text: ($header + "\n```json\n" + $body + "\n```") }' \
               > /tmp/payload.json
 
-            echo "Sending Batch $batch/$TOTAL_BATCHES"
-            curl -sS -H "Content-Type: application/json" -d @/tmp/payload.json "$TEAMS_WEBHOOK_URL"
+            echo "Sending Batch $batch..."
+            curl -sS -H "Content-Type: application/json" \
+                 -d @/tmp/payload.json \
+                 "$TEAMS_WEBHOOK_URL"
 
-            sleep 2   # avoid Teams double-message collision
+            # Small delay helps Teams process sequential messages
+            sleep 2
 
             index=$end
             batch=$(( batch + 1 ))
           done
 
-          echo "All batches sent."
+          echo "All batches sent successfully."
