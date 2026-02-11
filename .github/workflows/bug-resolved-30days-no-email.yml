@@ -39,80 +39,58 @@ jobs:
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python bug-resolved-30days-no-email.py
 
-      - name: Upload report artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jira-report
-          path: jira_report.json
-
       - name: Fix invalid JSON
         run: |
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
-      - name: Commit JSON for audit
-        env:
-          TZ: UTC
+      - name: Commit JSON into reports
         run: |
           TS=$(date -u +%Y-%m-%dT%H%M%SZ)
           mkdir -p reports
-          cp jira_report.json "reports/jira_report_${TS}.json"
-          cp jira_report.json "reports/jira_report_latest.json"
+          cp jira_report.json reports/jira_report_${TS}.json
+          cp jira_report.json reports/jira_report_latest.json
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add reports/jira_report_${TS}.json reports/jira_report_latest.json
-          git commit -m "Jira report: ${TS}" || echo "Nothing to commit"
-          git push || echo "Nothing to push"
+          git commit -m "Jira report: ${TS}" || true
+          git push || true
 
-      - name: Send issues to Teams in batches
+      - name: Send issues to Teams in batches (20 per message)
         if: env.TEAMS_WEBHOOK_URL != ''
         run: |
-          if [ -z "$TEAMS_WEBHOOK_URL" ]; then
-            echo "Webhook URL not set; skipping Teams send."
-            exit 0
-          fi
-
           echo "Extracting issues..."
           jq '.issues' jira_report.json > issues.json
 
-          ISSUE_COUNT=$(jq 'length' issues.json)
-          echo "Total issues: $ISSUE_COUNT"
-
+          COUNT=$(jq 'length' issues.json)
           BATCH_SIZE=20
-          TOTAL_BATCHES=$(( (ISSUE_COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
-          echo "Total batches: $TOTAL_BATCHES"
+          TOTAL=$(( (COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
 
-          for ((i=0; i<ISSUE_COUNT; i+=BATCH_SIZE)); do
-            START=$i
-            END=$((i + BATCH_SIZE))
-            BATCH_NUMBER=$(( (i / BATCH_SIZE) + 1 ))
+          echo "Total issues: $COUNT"
+          echo "Total batches: $TOTAL"
 
-            echo "Preparing batch $BATCH_NUMBER"
+          index=0
+          while [ $index -lt $COUNT ]; do
+            END=$((index + BATCH_SIZE))
+            BATCH=$(( (index / BATCH_SIZE) + 1 ))
 
-            jq ".[$START:$END]" issues.json > issues_batch.json
+            jq ".[$index:$END]" issues.json > issues_batch.json
 
-            # Create final JSON object: { "issues": [...] }
-            jq -n --slurpfile b issues_batch.json \
-              '{ issues: $b[0] }' > final_batch.json
+            jq -n --slurpfile x issues_batch.json \
+              '{ issues: $x[0] }' > final_batch.json
 
-            # Convert JSON file to escaped string for YAML safety
-            ESCAPED_JSON=$(jq -Rs '.' final_batch.json)
+            ESCAPED=$(jq -Rs '.' final_batch.json)
 
-            # Create Teams payload safely
-            cat <<EOF > teams_payload.json
-{
-  "text": $ESCAPED_JSON
-}
-EOF
+            printf '{ "text": %s }\n' "$ESCAPED" > teams_payload.json
 
-            echo "Sending batch $BATCH_NUMBER"
+            echo "Sending batch $BATCH of $TOTAL"
             curl -H "Content-Type: application/json" \
                  -d @teams_payload.json \
                  "$TEAMS_WEBHOOK_URL"
 
+            index=$((index + BATCH_SIZE))
           done
 
-          echo "All batches sent to Teams successfully!"
+          echo "All batches sent successfully!"
