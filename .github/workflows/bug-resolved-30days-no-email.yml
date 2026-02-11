@@ -49,16 +49,17 @@ jobs:
 
       - name: Prepare pretty JSON for Teams text block
         run: |
-          # Pretty-print JSON so Teams shows it cleanly
+          # Pretty print JSON
           PRETTY_JSON=$(jq '.' jira_report.json)
 
-          # Wrap JSON in code block for Teams
-          MESSAGE="```
+          # Create code block WITHOUT using backticks in YAML
+          MESSAGE="\\\`\\\`\\\`
 $PRETTY_JSON
-```"
+\\\`\\\`\\\`"
 
-          # Build JSON payload safely
-          jq -n --arg text "$MESSAGE" '{text: $text}' > payload.json
+          # Build Teams payload
+          jq -n --arg text "$MESSAGE" \
+            '{text: $text}' > payload.json
 
       - name: Send to Microsoft Teams
         run: |
