@@ -33,53 +33,12 @@ jobs:
           name: jira-report
           path: jira_report.json
 
-      # ⬇⬇⬇ REPLACES your "Notify Teams (simple text)" step ⬇⬇⬇
-      - name: Notify Teams with report (Adaptive Card + Base64)
+      - name: Notify Teams (Minimal — For Power Automate Trigger)
         shell: bash
         run: |
-          # Base64 encode the JSON (single line, no wraps)
-          REPORT_B64=$(base64 -w 0 jira_report.json)
+          COUNT=$(jq '.issues | length' jira_report.json)
+          MESSAGE="New bug report generated with $COUNT issues. Artifact available in GitHub Actions run: $GITHUB_RUN_ID"
 
-          # Create the Adaptive Card JSON with a placeholder for the data URL
-          cat << 'EOF' > message.json
-          {
-            "type": "message",
-            "attachments": [
-              {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                  "type": "AdaptiveCard",
-                  "version": "1.3",
-                  "body": [
-                    { "type": "TextBlock", "text": "New Bug Summary Report", "weight": "Bolder", "size": "Large" },
-                    { "type": "TextBlock", "text": "A new bug report (last 30 days) is available.", "wrap": true },
-                    { "type": "TextBlock", "text": "Posted by GitHub Actions", "isSubtle": true, "spacing": "Small" }
-                  ],
-                  "actions": [
-                    {
-                      "type": "Action.OpenUrl",
-                      "title": "Download JSON",
-                      "url": "DATA_URL_PLACEHOLDER"
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-          EOF
-
-          # Inject a safe data URL containing the Base64 JSON
-          DATA_URL="data:application/json;base64,${REPORT_B64}"
-
-          # Prefer jq if available; fallback to sed
-          if command -v jq >/dev/null 2>&1; then
-            jq --arg url "$DATA_URL" '.attachments[0].content.actions[0].url = $url' message.json > message_final.json
-          else
-            sed "s|DATA_URL_PLACEHOLDER|$DATA_URL|g" message.json > message_final.json
-          fi
-
-          # Post to Teams Incoming Webhook
           curl -H "Content-Type: application/json" \
-               -d @message_final.json \
+               -d "{\"text\": \"${MESSAGE}\"}" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
