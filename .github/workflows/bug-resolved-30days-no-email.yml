@@ -15,13 +15,17 @@ jobs:
 
     env:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+      # Optional: override batch size without editing YAML (set in repo/Org variables or secrets)
+      BATCH_SIZE: 20
 
     steps:
+      # Checkout
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -33,64 +37,94 @@ jobs:
           sudo apt-get install -y jq
           pip install requests
 
+      # Run your Jira script to generate jira_report.json
       - name: Run Jira report script
         env:
           JIRA_USER: ${{ secrets.JIRA_USER }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python bug-resolved-30days-no-email.py
 
-      - name: Fix invalid JSON
+      # Optional: keep as artifact
+      - name: Upload report artifact (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-report
+          path: jira_report.json
+
+      # Normalize JSON: null -> ""
+      - name: Fix invalid JSON (convert null → "")
         run: |
           jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
           mv fixed.json jira_report.json
 
-      - name: Commit JSON into reports
+      # Commit for audit (optional but handy)
+      - name: Commit JSON into /reports (timestamp + latest)
+        env:
+          TZ: UTC
         run: |
           TS=$(date -u +%Y-%m-%dT%H%M%SZ)
           mkdir -p reports
-          cp jira_report.json reports/jira_report_${TS}.json
-          cp jira_report.json reports/jira_report_latest.json
+          cp jira_report.json "reports/jira_report_${TS}.json"
+          cp jira_report.json "reports/jira_report_latest.json"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add reports/jira_report_${TS}.json reports/jira_report_latest.json
-          git commit -m "Jira report: ${TS}" || true
-          git push || true
+          git commit -m "Jira report: ${TS}" || echo "No changes to commit"
+          git push || echo "No changes to push"
 
-      - name: Send issues to Teams in batches (20 per message)
+      # Split by number of issues and send each batch as pretty JSON in a Teams code block
+      - name: Send issues to Teams in batches (pretty JSON, code block)
         if: env.TEAMS_WEBHOOK_URL != ''
         run: |
-          echo "Extracting issues..."
+          if [ -z "$TEAMS_WEBHOOK_URL" ]; then
+            echo "TEAMS_WEBHOOK_URL not set; skipping Teams send."
+            exit 0
+          fi
+
+          # Extract issues array
           jq '.issues' jira_report.json > issues.json
 
           COUNT=$(jq 'length' issues.json)
-          BATCH_SIZE=20
+          BATCH_SIZE="${BATCH_SIZE:-20}"
           TOTAL=$(( (COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
 
           echo "Total issues: $COUNT"
+          echo "Batch size  : $BATCH_SIZE"
           echo "Total batches: $TOTAL"
 
           index=0
           while [ $index -lt $COUNT ]; do
             END=$((index + BATCH_SIZE))
             BATCH=$(( (index / BATCH_SIZE) + 1 ))
+            echo "Preparing batch $BATCH of $TOTAL (items $index to $END)"
 
+            # Slice issues for this batch
             jq ".[$index:$END]" issues.json > issues_batch.json
 
-            jq -n --slurpfile x issues_batch.json \
-              '{ issues: $x[0] }' > final_batch.json
+            # Build EXACT structure: { "issues": [ ... ] }
+            jq -n --slurpfile items issues_batch.json \
+              '{ issues: $items[0] }' > final_batch.json
 
-            ESCAPED=$(jq -Rs '.' final_batch.json)
+            # Pretty print the JSON exactly like your single-batch step
+            jq '.' final_batch.json > pretty_batch.json
 
-            printf '{ "text": %s }\n' "$ESCAPED" > teams_payload.json
+            # Build Teams payload using a code block (no YAML heredoc; safe)
+            # This keeps the JSON intact and readable in Teams
+            jq -n \
+              --arg header "Batch ${BATCH}/${TOTAL}" \
+              --rawfile body pretty_batch.json \
+              '{ text: ($header + "\n" + "```" + "\n" + $body + "\n" + "```") }' \
+              > teams_payload.json
 
-            echo "Sending batch $BATCH of $TOTAL"
-            curl -H "Content-Type: application/json" \
+            echo "Sending batch $BATCH of $TOTAL to Teams…"
+            curl -sS -f -H "Content-Type: application/json" \
                  -d @teams_payload.json \
                  "$TEAMS_WEBHOOK_URL"
 
             index=$((index + BATCH_SIZE))
           done
 
-          echo "All batches sent successfully!"
+          echo "All batches sent to Teams successfully!"
