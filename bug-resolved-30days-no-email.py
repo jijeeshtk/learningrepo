@@ -9,7 +9,7 @@ JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 
 # JQL
-JQL = 'project = VCS AND type = Bug AND resolutiondate >= -14d AND status IN (Done, Cancelled) ORDER BY resolutiondate DESC'
+JQL = 'project = VCS AND type = Bug AND resolutiondate >= -30d AND status IN (Done, Cancelled) ORDER BY resolutiondate DESC'
 
 def fetch_jira_issues():
     url = f"{JIRA_URL}/rest/api/3/search/jql"
