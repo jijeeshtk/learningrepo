@@ -1,0 +1,930 @@
+{
+  "issues": [
+    {
+      "key": "VCS-17581",
+      "summary": "vSphere SHA-1 validation in streach cluster ",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Pakula, Przemyslaw",
+      "Reporter": "lukasz.harwazinski",
+      "EpicLink": "VCS-9488",
+      "Created": "10/20/2025",
+      "Resolved": "02/10/2026",
+      "Sprint": "",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "DHC DevSecOps",
+      "Teams": "DevSecOps [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "3.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-18030",
+      "summary": "TOS 2.0.1.1 Hardening ESXi8 - mgt esxi hosts unreachable",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Mihai Radan",
+      "Reporter": "Bembnista, Dawid",
+      "EpicLink": "VCS-17586",
+      "Created": "01/09/2026",
+      "Resolved": "02/10/2026",
+      "Sprint": "2026-PI1 OneVCS #1",
+      "AffectsVersions": [
+        "DHC 2.0.1"
+      ],
+      "FixVersions": [
+        "DHC 2.0.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "OneVCS [CMI]",
+      "RootCause": "Code quality",
+      "BugMaturity": "5.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-18038",
+      "summary": "Problem with stretch MGT cluster",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Pakula, Przemyslaw",
+      "Reporter": "Kozicki, Adam",
+      "EpicLink": "VCS-15497",
+      "Created": "01/12/2026",
+      "Resolved": "02/09/2026",
+      "Sprint": "2026-Pi1 DSO #1",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "VCSUK",
+      "ScrumTeams": "",
+      "Teams": "DevSecOps [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "5.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17888",
+      "summary": "TOS 2.0.1.1 vcs002 NIC disconnected after pre-upgrade snapshot",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Mihai Radan",
+      "Reporter": "Bembnista, Dawid",
+      "EpicLink": "VCS-17586",
+      "Created": "11/28/2025",
+      "Resolved": "02/06/2026",
+      "Sprint": "2026-PI1 OneVCS #1",
+      "AffectsVersions": [
+        "DHC 2.0.1"
+      ],
+      "FixVersions": [
+        "DHC 2.0.1"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "OneVCS [CMI]",
+      "RootCause": "Other",
+      "BugMaturity": "4.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17608",
+      "summary": "Issues with VRA configuration in VCS04",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Mihai Radan",
+      "Reporter": "Dandanayak, Krishnasai",
+      "EpicLink": "VCS-17586",
+      "Created": "10/24/2025",
+      "Resolved": "02/06/2026",
+      "Sprint": "2026-PI1 OneVCS #1",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "Tooling & Integration",
+      "Teams": "OneVCS [CMI]",
+      "RootCause": "",
+      "BugMaturity": "4.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17382",
+      "summary": "check and adapt crontab jobs in Ansible",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "leenesh subhash deshpande",
+      "Reporter": "Mirela",
+      "EpicLink": "VCS-15497",
+      "Created": "09/24/2025",
+      "Resolved": "02/05/2026",
+      "Sprint": "",
+      "AffectsVersions": [
+        "DHC 2.0"
+      ],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "All",
+      "ScrumTeams": "DHC DevSecOps",
+      "Teams": "DevSecOps [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17388",
+      "summary": "missing .key files in /root/.ssl",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Łukasz Bieńkowski",
+      "Reporter": "Lukasz Tomaszewski",
+      "EpicLink": "VCS-17586",
+      "Created": "09/26/2025",
+      "Resolved": "02/02/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.0"
+      ],
+      "FixVersions": [
+        "DHC 2.0"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "5.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17899",
+      "summary": "TOS 2.0.1.1 Copy files from bil001 to ans001 - Copy .ssl directory",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "P MATHEW, MARTIN",
+      "Reporter": "Bembnista, Dawid",
+      "EpicLink": "VCS-17586",
+      "Created": "12/01/2025",
+      "Resolved": "02/02/2026",
+      "Sprint": "PI26I5 A&O",
+      "AffectsVersions": [
+        "DHC 2.0.1"
+      ],
+      "FixVersions": [
+        "DHC 2.0.1"
+      ],
+      "Customers": "",
+      "ScrumTeams": "Automation & Orchestration",
+      "Teams": "Automation and Orchestration [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "4.0",
+      "ReleasePackage": "2.0.1.1"
+    },
+    {
+      "key": "VCS-17889",
+      "summary": "TOS 2.0.1.1 SDDC precheck - vCenter backup after upgrade",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Wieczorek, Adam",
+      "Reporter": "Bembnista, Dawid",
+      "EpicLink": "VCS-17586",
+      "Created": "11/28/2025",
+      "Resolved": "01/30/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.0.1"
+      ],
+      "FixVersions": [
+        "DHC 2.0.1"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.0.1.1"
+    },
+    {
+      "key": "VCS-17569",
+      "summary": "Aviva AD security enhancement",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Ciprian, Sferle",
+      "Reporter": "mohammed-ilyas.alam",
+      "EpicLink": "VCS-11045",
+      "Created": "10/14/2025",
+      "Resolved": "01/30/2026",
+      "Sprint": "PI26I5 T&I, PI26I1 T&I, PI25I4 T&I, PI25I5 T&I",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "DHC 2.0.1"
+      ],
+      "Customers": "Aviva",
+      "ScrumTeams": "Tooling & Integration",
+      "Teams": "Tooling and Integration [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "2.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-18049",
+      "summary": "configureNsxt.yml - playbook analysis and fixing - part 2",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Kilanowski, Stanislaw",
+      "Reporter": "Kilanowski, Stanislaw",
+      "EpicLink": "VCS-13807",
+      "Created": "01/15/2026",
+      "Resolved": "01/29/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.0"
+      ],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17512",
+      "summary": "Double entries for SNOW_USER_CRED and SNOW_EVENT_CRED created",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Divyaprakash J",
+      "Reporter": "Pawel Wlodarczyk",
+      "EpicLink": "VCS-4333",
+      "Created": "10/10/2025",
+      "Resolved": "01/29/2026",
+      "Sprint": "PI26I5 T&I",
+      "AffectsVersions": [
+        "DHC 2.0"
+      ],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "Tooling & Integration",
+      "Teams": "Tooling and Integration [CMI VCS]",
+      "RootCause": "Configuration",
+      "BugMaturity": "4.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-18056",
+      "summary": "TOS-2.1.1.0 - SDM upgrade - errors reported during precheck",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Stanek, Mariusz",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-17588",
+      "Created": "01/16/2026",
+      "Resolved": "01/28/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Configuration",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.1.1.0"
+    },
+    {
+      "key": "VCS-18040",
+      "summary": "TOS-2.1.0.0 - Tanzu cmp build - createTkgWorkload.yml keeps failing",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-17588",
+      "Created": "01/13/2026",
+      "Resolved": "01/26/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Other",
+      "BugMaturity": "",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-18032",
+      "summary": "TOS-2.1.0.0 - Tanzu mgt build - lack of dns entry",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-17588",
+      "Created": "01/09/2026",
+      "Resolved": "01/26/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Other",
+      "BugMaturity": "",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-18031",
+      "summary": "TOS-2.1.0.0 - Tanzu TKG Cluster Compatibility check missing",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-17588",
+      "Created": "01/09/2026",
+      "Resolved": "01/26/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Other",
+      "BugMaturity": "",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-17374",
+      "summary": "Stage 2 installation of VRLI content packs gives error 409 (Conflict) for some of the packs",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Łukasz Bieńkowski",
+      "Reporter": "Łukasz Bieńkowski",
+      "EpicLink": "VCS-14370",
+      "Created": "09/23/2025",
+      "Resolved": "01/25/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.0"
+      ],
+      "FixVersions": [
+        "DHC 2.0"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "3.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-18041",
+      "summary": "TOS 2.0.1.1 Remediate AD Security Enhancement24 - service account passwords requirement",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Divyaprakash J",
+      "Reporter": "Bembnista, Dawid",
+      "EpicLink": "VCS-14399",
+      "Created": "01/13/2026",
+      "Resolved": "01/22/2026",
+      "Sprint": "PI26I5 T&I",
+      "AffectsVersions": [
+        "DHC 2.0.1"
+      ],
+      "FixVersions": [
+        "DHC 2.0.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "Tooling and Integration [CMI VCS]",
+      "RootCause": "Invalid Documentation",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.0.1.1"
+    },
+    {
+      "key": "VCS-18033",
+      "summary": "TOS-2.1.0.0 - Tanzu cmp build - billing account creation fails",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-17588",
+      "Created": "01/09/2026",
+      "Resolved": "01/22/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-18043",
+      "summary": "TOS-2.1.0.0 - Tanzu cmp build - billing config issue",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-17588",
+      "Created": "01/14/2026",
+      "Resolved": "01/22/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "4.0",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-18044",
+      "summary": "TOS-2.1.0.0 - Tanzu cmp build - billing crontab creation issue",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-17588",
+      "Created": "01/14/2026",
+      "Resolved": "01/22/2026",
+      "Sprint": "PI26I5 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-17905",
+      "summary": "TOS 2.1.0 wiEnableManagedOs.md – Documentation update needed",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Tomasz Korniluk",
+      "Reporter": "Radu Simionescu",
+      "EpicLink": "VCS-16151",
+      "Created": "12/03/2025",
+      "Resolved": "01/19/2026",
+      "Sprint": "PI26I4 A&O",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "Automation & Orchestration",
+      "Teams": "Automation and Orchestration [CMI VCS]",
+      "RootCause": "Invalid Documentation",
+      "BugMaturity": "4.0",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-17681",
+      "summary": "vRA auto generated VM names are not correctly applied to VMs",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Janwalkar, Aparna",
+      "Reporter": "Oliver Scholle",
+      "EpicLink": "VCS-16151",
+      "Created": "10/30/2025",
+      "Resolved": "01/19/2026",
+      "Sprint": "PI26I4 A&O",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "Automation & Orchestration",
+      "Teams": "Automation and Orchestration [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "4.0",
+      "ReleasePackage": "2.0.0.14"
+    },
+    {
+      "key": "VCS-17772",
+      "summary": "TOS 2.0.1.1 vCenter upgrade/patching - cold snapshots needed for both vCenters in linked mode",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Wieczorek, Adam",
+      "Reporter": "Bembnista, Dawid",
+      "EpicLink": "VCS-14370",
+      "Created": "11/20/2025",
+      "Resolved": "01/19/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [
+        "DHC 2.0.1"
+      ],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Other",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.0.1.1"
+    },
+    {
+      "key": "VCS-17369",
+      "summary": "AD users can't log in to LCM",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Łukasz Bieńkowski",
+      "Reporter": "Adam Szymczak",
+      "EpicLink": "VCS-14370",
+      "Created": "09/23/2025",
+      "Resolved": "01/19/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [
+        "DHC 2.0"
+      ],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Configuration",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.0.0.14"
+    },
+    {
+      "key": "VCS-17959",
+      "summary": "TOS-2.1.0.0 - vRO workflow SendSnowEventHandler wrong input data (managedos)",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "P MATHEW, MARTIN",
+      "Reporter": "Tomasz Korniluk",
+      "EpicLink": "VCS-16151",
+      "Created": "12/11/2025",
+      "Resolved": "01/16/2026",
+      "Sprint": "PI26I4 A&O",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "",
+      "ScrumTeams": "Automation & Orchestration",
+      "Teams": "Automation and Orchestration [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "4.0",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-17880",
+      "summary": "TOS-2.1.0.0 - wiTenantBuilderVraOnPremMultiTenancy  (11)",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tworek",
+      "Reporter": "Kozicki, Adam",
+      "EpicLink": "VCS-16151",
+      "Created": "11/25/2025",
+      "Resolved": "01/16/2026",
+      "Sprint": "PI26I4 A&O",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "Automation & Orchestration",
+      "Teams": "Automation and Orchestration [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17451",
+      "summary": "Nessus scan generate 'failed login attempts' on windows hosts.",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "adriana, slabu",
+      "Reporter": "Pakula, Przemyslaw",
+      "EpicLink": "VCS-15497",
+      "Created": "09/29/2025",
+      "Resolved": "01/16/2026",
+      "Sprint": "PI26I4 DSO",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "All",
+      "ScrumTeams": "DHC DevSecOps",
+      "Teams": "DevSecOps [CMI VCS]",
+      "RootCause": "Other",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.0.0.13"
+    },
+    {
+      "key": "VCS-6661",
+      "summary": "Monit service on HGW is monitored in vROPS but it`s not present on VM",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Łukasz Bieńkowski",
+      "Reporter": "Adam Szymczak",
+      "EpicLink": "VCS-14370",
+      "Created": "03/10/2023",
+      "Resolved": "01/16/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Configuration",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.0.0.13"
+    },
+    {
+      "key": "VCS-17705",
+      "summary": "review and fix ad password policy pw length inconsistencies",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Alexandru Giurgiu",
+      "Reporter": "Oliver Scholle",
+      "EpicLink": "VCS-6740",
+      "Created": "11/05/2025",
+      "Resolved": "01/16/2026",
+      "Sprint": "PI26I4 T&I",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "Tooling & Integration",
+      "Teams": "Tooling and Integration [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17398",
+      "summary": "configureNsxt.yml - playbook analysis and fixing - part 1",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Kilanowski, Stanislaw",
+      "Reporter": "Michal Pindych",
+      "EpicLink": "VCS-13807",
+      "Created": "09/29/2025",
+      "Resolved": "01/16/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [
+        "DHC 2.0"
+      ],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17326",
+      "summary": "Esxi hardening does not include drhosts: hardeningEsxi8.yml",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Łukasz Bieńkowski",
+      "Reporter": "Oliver Scholle",
+      "EpicLink": "VCS-14370",
+      "Created": "09/16/2025",
+      "Resolved": "01/15/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Configuration",
+      "BugMaturity": "5.0",
+      "ReleasePackage": "2.0.0.13"
+    },
+    {
+      "key": "VCS-17961",
+      "summary": "TOS-2.1.0.0 - Login as local admin with no password (managedos)",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "P MATHEW, MARTIN",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-16151",
+      "Created": "12/12/2025",
+      "Resolved": "01/15/2026",
+      "Sprint": "PI26I3 A&O, PI26I4 A&O",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "",
+      "ScrumTeams": "Automation & Orchestration",
+      "Teams": "Automation and Orchestration [CMI VCS]",
+      "RootCause": "Other",
+      "BugMaturity": "4.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-18029",
+      "summary": "TOS-2.1 -Environment issue for Tanzu deployment",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Mihai Radan",
+      "Reporter": "jijeesh.valappil@atos.net",
+      "EpicLink": "VCS-277",
+      "Created": "01/09/2026",
+      "Resolved": "01/15/2026",
+      "Sprint": "",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [],
+      "Customers": "",
+      "ScrumTeams": "",
+      "Teams": "Automation and Orchestration [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17962",
+      "summary": "TOS-2.1.0.0 - Tanzu cmp build - tanzuConfig.yml syntax error",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-14370",
+      "Created": "12/12/2025",
+      "Resolved": "01/15/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Other",
+      "BugMaturity": "",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-17965",
+      "summary": "TOS-2.1.0.0 - Tanzu mgt build",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Lukasz Tomaszewski",
+      "Reporter": "Slawomir Gizynski",
+      "EpicLink": "VCS-14370",
+      "Created": "12/15/2025",
+      "Resolved": "01/15/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [
+        "DHC 2.1"
+      ],
+      "FixVersions": [
+        "DHC 2.1"
+      ],
+      "Customers": "Customer_Engagement_Team",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "",
+      "BugMaturity": "",
+      "ReleasePackage": "2.1.0.0"
+    },
+    {
+      "key": "VCS-17385",
+      "summary": "VRLI Agents Not Collecting Data on Windows Management VMs",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Adam Szymczak",
+      "Reporter": "Pakula, Przemyslaw",
+      "EpicLink": "VCS-15497",
+      "Created": "09/25/2025",
+      "Resolved": "01/15/2026",
+      "Sprint": "PI26I4 DSO",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "R2.2 VMware Cloud Services"
+      ],
+      "Customers": "All",
+      "ScrumTeams": "DHC DevSecOps",
+      "Teams": "DevSecOps [CMI VCS]",
+      "RootCause": "Code quality",
+      "BugMaturity": "4.0",
+      "ReleasePackage": ""
+    },
+    {
+      "key": "VCS-17390",
+      "summary": "Investigate space requirements on WSUS",
+      "IssueType": "Bug",
+      "Status": "Done",
+      "Priority": "Normal",
+      "Assignee": "Stanek, Mariusz",
+      "Reporter": "Oliver Scholle",
+      "EpicLink": "VCS-14370",
+      "Created": "09/26/2025",
+      "Resolved": "01/14/2026",
+      "Sprint": "PI26I4 ICP",
+      "AffectsVersions": [],
+      "FixVersions": [
+        "DHC 2.0"
+      ],
+      "Customers": "",
+      "ScrumTeams": "IaaS and Core Platform",
+      "Teams": "IaaS and Core Platform [CMI VCS]",
+      "RootCause": "Configuration",
+      "BugMaturity": "5.0",
+      "ReleasePackage": ""
+    }
+  ]
+}
