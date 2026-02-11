@@ -3,7 +3,7 @@ name: Bug resolved report
 on:
   schedule:
     - cron: "0 */12 * * *"   # every 12 hours
-  workflow_dispatch:
+  workflow_dispatch:          # manual trigger
 
 jobs:
   jira-report:
@@ -33,36 +33,31 @@ jobs:
           name: jira-report
           path: jira_report.json
 
-      - name: Send pretty JSON to Teams as code block (safe mode)
+      - name: Send pretty JSON to Teams as plain code block
         shell: bash
         run: |
-          # Step 1 — Fix invalid JSON artifacts
+          # Fix invalid JSON
           sed -i 's/":,/"":/g' jira_report.json
 
-          # Step 2 — Validate JSON or fallback
+          # Validate or fallback
           if ! jq empty jira_report.json 2>/dev/null; then
-            echo "Invalid JSON — fallback used"
-            SAFE_JSON='{"error": "Invalid JSON generated"}'
+            SAFE_JSON='{"error":"Invalid JSON"}'
           else
             SAFE_JSON=$(jq '.' jira_report.json)
           fi
 
-          # Step 3 — Wrap inside JSON code block
           WRAPPED="```json
 $SAFE_JSON
 ```"
 
-          # Step 4 — Check Teams limit (approx 25 KB)
+          # If payload too large → fallback to minified JSON
           if [ $(echo -n "$WRAPPED" | wc -c) -gt 25000 ]; then
-            echo "Pretty JSON too large — using minified JSON"
             SAFE_JSON=$(jq -c '.' jira_report.json)
             WRAPPED="$SAFE_JSON"
           fi
 
-          # Step 5 — Build safe JSON payload
           PAYLOAD=$(jq -n --arg text "$WRAPPED" '{text: $text}')
 
-          # Step 6 — Send to Teams webhook
           curl -H "Content-Type: application/json" \
                -d "$PAYLOAD" \
                "${{ secrets.TEAMS_WEBHOOK_URL }}"
