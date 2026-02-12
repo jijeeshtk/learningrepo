@@ -35,7 +35,7 @@ jobs:
         env:
           JIRA_USER: ${{ secrets.JIRA_USER }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python bug-resolved-30days-no-email.py
+        run: python bug-resolved-30days.py
 
       - name: Normalize JSON (null → "")
         run: |
