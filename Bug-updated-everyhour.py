@@ -3,38 +3,21 @@ import json
 import os
 from datetime import datetime
 
-# Jira credentials and base URL
+# Jira credentials (injected from GitHub Secrets)
 JIRA_URL = "https://atos-global.atlassian.net"
 JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
 
-# Correct Jira Search API endpoint
+# Correct Jira Search endpoint
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search"
 
-# JQL
+# Correct JQL (NO HTML entities!)
 JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -2h'
 
-def fetch_jira_issues():
-    headers = {"Accept": "application/json", "Content-Type": "application/json"}
-    auth = (JIRA_USER, JIRA_TOKEN)
 
-    body = {
-        "jql": JQL,
-        "fields": [
-            "summary", "issuetype", "status", "priority", "assignee", "reporter",
-            "customfield_10014", "created", "resolutiondate", "customfield_10020",
-            "versions", "fixVersions", "customfield_11049", "customfield_11034",
-            "customfield_10001", "customfield_11067", "customfield_11062",
-            "customfield_11055"
-        ],
-        "maxResults": 50
-    }
-
-    response = requests.post(SEARCH_URL, headers=headers, auth=auth, json=body)
-    response.raise_for_status()
-    data = response.json()
-
-    return data.get("issues", [])
+# ----------------------------
+# Utility Functions
+# ----------------------------
 
 def nz(value, default=""):
     return default if value in (None, "") else value
@@ -56,13 +39,53 @@ def safe_date(value):
     except Exception:
         return to_string(value)
 
+
+# ----------------------------
+# Fetch Jira Issues
+# ----------------------------
+
+def fetch_jira_issues():
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    auth = (JIRA_USER, JIRA_TOKEN)
+
+    body = {
+        "jql": JQL,
+        "fields": [
+            "summary", "issuetype", "status", "priority", "assignee", "reporter",
+            "customfield_10014", "created", "resolutiondate", "customfield_10020",
+            "versions", "fixVersions", "customfield_11049", "customfield_11034",
+            "customfield_10001", "customfield_11067", "customfield_11062",
+            "customfield_11055"
+        ],
+        "maxResults": 50
+    }
+
+    response = requests.post(SEARCH_URL, headers=headers, auth=auth, json=body)
+
+    # Uncomment for debugging:
+    # print(response.status_code)
+    # print(response.text)
+
+    response.raise_for_status()
+    data = response.json()
+
+    return data.get("issues", [])
+
+
+# ----------------------------
+# Format JSON Output
+# ----------------------------
+
 def format_report(issues):
     report = {"issues": []}
 
     for issue in issues:
         fields = issue.get("fields", {}) or {}
 
-        # Sprint field
+        # Sprint (customfield_10020)
         sprint_data = fields.get("customfield_10020")
         if isinstance(sprint_data, list):
             sprint_value = ", ".join(
@@ -89,51 +112,58 @@ def format_report(issues):
             else ""
         )
 
-        # Versions arrays
+        # Versions lists
         affects_versions = [
-            nz(v.get("name")) for v in fields.get("versions", []) if isinstance(v, dict)
-        ]
-        fix_versions = [
-            nz(v.get("name")) for v in fields.get("fixVersions", []) if isinstance(v, dict)
+            nz(v.get("name"))
+            for v in fields.get("versions", [])
+            if isinstance(v, dict)
         ]
 
-        # Customers
+        fix_versions = [
+            nz(v.get("name"))
+            for v in fields.get("fixVersions", [])
+            if isinstance(v, dict)
+        ]
+
+        # Customers (list or string)
         customers_field = fields.get("customfield_11049", [])
         if isinstance(customers_field, list):
             customers_value = ", ".join(nz(c) for c in customers_field)
         else:
             customers_value = nz(customers_field)
 
-        report["issues"].append(
-            {
-                "key": nz(issue.get("key")),
-                "summary": nz(fields.get("summary")),
-                "IssueType": nz((fields.get("issuetype") or {}).get("name")),
-                "Status": nz((fields.get("status") or {}).get("name")),
-                "Priority": nz((fields.get("priority") or {}).get("name")),
-                "Assignee": assignee_value,
-                "Reporter": reporter_value,
-                "EpicLink": nz(fields.get("customfield_10014")),
-                "Created": safe_date(fields.get("created")),
-                "Resolved": safe_date(fields.get("resolutiondate")),
-                "Sprint": sprint_value,
-                "AffectsVersions": affects_versions,
-                "FixVersions": fix_versions,
-                "Customers": customers_value,
-                "ScrumTeams": nz((fields.get("customfield_11034") or {}).get("value")),
-                "Teams": nz((fields.get("customfield_10001") or {}).get("name")),
-                "RootCause": nz((fields.get("customfield_11067") or {}).get("value")),
-                "BugMaturity": to_string(fields.get("customfield_11062")),
-                "ReleasePackage": nz(fields.get("customfield_11055")),
-            }
-        )
+        report["issues"].append({
+            "key": nz(issue.get("key")),
+            "summary": nz(fields.get("summary")),
+            "IssueType": nz((fields.get("issuetype") or {}).get("name")),
+            "Status": nz((fields.get("status") or {}).get("name")),
+            "Priority": nz((fields.get("priority") or {}).get("name")),
+            "Assignee": assignee_value,
+            "Reporter": reporter_value,
+            "EpicLink": nz(fields.get("customfield_10014")),
+            "Created": safe_date(fields.get("created")),
+            "Resolved": safe_date(fields.get("resolutiondate")),
+            "Sprint": sprint_value,
+            "AffectsVersions": affects_versions,
+            "FixVersions": fix_versions,
+            "Customers": customers_value,
+            "ScrumTeams": nz((fields.get("customfield_11034") or {}).get("value")),
+            "Teams": nz((fields.get("customfield_10001") or {}).get("name")),
+            "RootCause": nz((fields.get("customfield_11067") or {}).get("value")),
+            "BugMaturity": to_string(fields.get("customfield_11062")),
+            "ReleasePackage": nz(fields.get("customfield_11055")),
+        })
 
     return json.dumps(report, indent=2)
 
+
+# ----------------------------
+# MAIN
+# ----------------------------
+
 if __name__ == "__main__":
-    # Fetch + transform + print JSON (NO logs)
     issues = fetch_jira_issues()
     report = format_report(issues)
 
-    # IMPORTANT: Print *only* the JSON
+    # Print ONLY JSON — no newlines, no logs
     print(report, end="")
