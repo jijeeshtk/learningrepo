@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+      TEAMS_WEB_HOOK_URL: ${{ secrets.TEAMS_WEB_HOOK_URL }}
 
     steps:
       - name: Checkout repo
