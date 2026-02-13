@@ -11,7 +11,7 @@ TEAMS_WEBHOOK_URL = os.getenv("TEAMS_WEBHOOK_URL")
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
 # New Bugs/Defects created in last 12 hours
-JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -4d ORDER BY created DESC'
+JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -12h ORDER BY created DESC'
 
 # Fields required for formatting the message
 FIELDS = [
@@ -19,7 +19,6 @@ FIELDS = [
     "reporter",
     "priority",
     "versions",                # Affected Versions
-    # We intentionally DO NOT use description for "Error Message" (leave blank as per requirement)
     "customfield_11049",       # Customers (string or multi-select)
 ]
 
@@ -86,9 +85,9 @@ def extract_affected_versions(fields):
 def map_priority_to_impact(priority_name: str) -> str:
     """
     Map Jira priority to Impact {High, Medium, Low}
-    Expedite/Highest/High -> High
-    Medium -> Medium
-    Low/Lowest -> Low
+    Expedite/Highest/High/Urgent/Critical -> High
+    Medium/Normal -> Medium
+    Low/Lowest/Minor/Trivial -> Low
     Fallback -> High (conservative)
     """
     if not priority_name:
@@ -102,29 +101,24 @@ def map_priority_to_impact(priority_name: str) -> str:
         return "Low"
     return "High"
 
-def format_issue_message(issue):
+def format_issue_message_lines(issue):
     fields = issue.get("fields", {}) or {}
-    key = nz(issue.get("key"))
+    key = (issue.get("key") or "").strip()
     url = f"{JIRA_URL}/browse/{key}" if key else ""
 
     reporter = fields.get("reporter") or {}
-    reporter_name = nz(reporter.get("displayName")) or nz(reporter.get("emailAddress"))
+    reporter_name = (reporter.get("displayName") or reporter.get("emailAddress") or "").strip()
 
-    summary = nz(fields.get("summary"))
+    summary = (fields.get("summary") or "").strip()
     customers = extract_customers(fields)
     affected_versions = extract_affected_versions(fields)
 
-    # Impact: mapped from Priority
-    priority_name = ""
-    if isinstance(fields.get("priority"), dict):
-        priority_name = fields["priority"].get("name") or ""
+    # Impact mapped from priority
+    priority_name = fields.get("priority", {}).get("name") if isinstance(fields.get("priority"), dict) else ""
     impact = map_priority_to_impact(priority_name)
 
-    # Error Message: intentionally blank per requirement
-    error_message = ""
-
-    # Ensure hard newlines for Teams
-    lines = [
+    # Error Message intentionally blank per requirement
+    return [
         "New JIRA Bug in VCS project (within last 12 hours)",
         f"{reporter_name} created new bug: {url}",
         f"Summary: {summary}",
@@ -133,17 +127,37 @@ def format_issue_message(issue):
         "Error Message: ",
         f"Impact: {impact}",
     ]
-    return "\n".join(lines).strip()
 
-def post_to_teams(text):
+def post_to_teams_card(issue_text_lines):
+    """
+    Sends a MessageCard to Teams with bold title and reliable line breaks.
+    """
     if not TEAMS_WEBHOOK_URL:
-        print("TEAMS_WEBHOOK_URL not set; printing message locally:\n")
-        print(text)
+        print("\n".join(issue_text_lines))
         print("\n---\n")
         return
 
-    payload = { "text": text }
-    resp = requests.post(TEAMS_WEBHOOK_URL, json=payload, headers={"Content-Type": "application/json"})
+    title = issue_text_lines[0]
+    body = "<br/>".join(issue_text_lines[1:])
+
+    payload = {
+        "@type": "MessageCard",
+        "@context": "http://schema.org/extensions",
+        "summary": "New JIRA Bug in VCS project",
+        "themeColor": "E81123",  # red accent
+        "sections": [
+            {
+                "activityTitle": f"**{title}**",
+                "text": body
+            }
+        ]
+    }
+
+    resp = requests.post(
+        TEAMS_WEBHOOK_URL,
+        data=json.dumps(payload),
+        headers={"Content-Type": "application/json"}
+    )
     try:
         resp.raise_for_status()
     except Exception as e:
@@ -156,8 +170,8 @@ def main():
         return
 
     for issue in issues:
-        msg = format_issue_message(issue)
-        post_to_teams(msg)
+        lines = format_issue_message_lines(issue)
+        post_to_teams_card(lines)
 
 if __name__ == "__main__":
     main()
