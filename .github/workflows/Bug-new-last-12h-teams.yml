@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL: ${{ secrets.JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL }}
+      JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL: ${{ vars.JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL }}
 
     steps:
       - name: Checkout repo
