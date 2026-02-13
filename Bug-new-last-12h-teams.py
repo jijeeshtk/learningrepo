@@ -132,7 +132,7 @@ def post_to_teams_card(issue_text_lines):
     """
     Sends a MessageCard to Teams with bold title and reliable line breaks.
     """
-    if not TEAMS_WEBHOOK_URL:
+    if not TEAMS_WEB_HOOK_URL:
         print("\n".join(issue_text_lines))
         print("\n---\n")
         return
