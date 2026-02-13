@@ -12,7 +12,7 @@ TEAMS_WEBHOOK_URL = os.getenv("TEAMS_WEBHOOK_URL")
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
 # New Bugs/Defects created in last 12 hours
-JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -80h ORDER BY created DESC'
+JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -4d ORDER BY created DESC'
 
 # Fields required for formatting the message
 FIELDS = [
