@@ -3,12 +3,12 @@ import json
 import requests
 
 # ====== CONFIG ======
-JIRA_URL = "https://atos-global.atlassian.net"
-JIRA_USER = os.getenv("JIRA_USER")
-JIRA_TOKEN = os.getenv("JIRA_TOKEN")
+JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL = "https://atos-global.atlassian.net"
+JIRA_VCS_API_EMAIL = os.getenv("JIRA_VCS_API_EMAIL")
+JIRA_VCS_API_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
 JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")
 
-SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
+SEARCH_URL = f"{JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL}/rest/api/3/search/jql"
 
 # New Bugs/Defects created in last 12 hours
 JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -12h ORDER BY created DESC'
@@ -30,11 +30,11 @@ def fetch_all_issues():
     """
     Query Jira GET /rest/api/3/search/jql (new style) with pagination using nextPageToken if present.
     """
-    if not JIRA_USER or not JIRA_TOKEN:
-        raise RuntimeError("JIRA_USER/JIRA_TOKEN not set in environment variables")
+    if not JIRA_VCS_API_EMAIL or not JIRA_VCS_API_TOKEN:
+        raise RuntimeError("JIRA_VCS_API_EMAIL/JIRA_VCS_API_TOKEN not set in environment variables")
 
     headers = {"Accept": "application/json"}
-    auth = (JIRA_USER, JIRA_TOKEN)
+    auth = (JIRA_VCS_API_EMAIL, JIRA_VCS_API_TOKEN)
 
     issues = []
     next_token = None
@@ -104,7 +104,7 @@ def map_priority_to_impact(priority_name: str) -> str:
 def format_issue_message_lines(issue):
     fields = issue.get("fields", {}) or {}
     key = (issue.get("key") or "").strip()
-    url = f"{JIRA_URL}/browse/{key}" if key else ""
+    url = f"{JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL}/browse/{key}" if key else ""
 
     reporter = fields.get("reporter") or {}
     reporter_name = (reporter.get("displayName") or reporter.get("emailAddress") or "").strip()
