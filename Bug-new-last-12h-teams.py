@@ -6,7 +6,7 @@ import requests
 JIRA_URL = "https://atos-global.atlassian.net"
 JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
-TEAMS_WEB_HOOK_URL = os.getenv("TEAMS_WEB_HOOK_URL")
+JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")
 
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
@@ -132,7 +132,7 @@ def post_to_teams_card(issue_text_lines):
     """
     Sends a MessageCard to Teams with bold title and reliable line breaks.
     """
-    if not TEAMS_WEB_HOOK_URL:
+    if not JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL:
         print("\n".join(issue_text_lines))
         print("\n---\n")
         return
@@ -154,7 +154,7 @@ def post_to_teams_card(issue_text_lines):
     }
 
     resp = requests.post(
-        TEAMS_WEB_HOOK_URL,
+        JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL,
         data=json.dumps(payload),
         headers={"Content-Type": "application/json"}
     )
