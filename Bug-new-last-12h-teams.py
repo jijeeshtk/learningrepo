@@ -6,7 +6,7 @@ import requests
 JIRA_URL = "https://atos-global.atlassian.net"
 JIRA_USER = os.getenv("JIRA_USER")
 JIRA_TOKEN = os.getenv("JIRA_TOKEN")
-TEAMS_WEBHOOK_URL = os.getenv("TEAMS_WEBHOOK_URL")
+TEAMS_WEB_HOOK_URL = os.getenv("TEAMS_WEB_HOOK_URL")
 
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
@@ -154,7 +154,7 @@ def post_to_teams_card(issue_text_lines):
     }
 
     resp = requests.post(
-        TEAMS_WEBHOOK_URL,
+        TEAMS_WEB_HOOK_URL,
         data=json.dumps(payload),
         headers={"Content-Type": "application/json"}
     )
