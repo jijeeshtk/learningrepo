@@ -1,7 +1,6 @@
 import os
 import json
 import requests
-from datetime import datetime
 
 # ====== CONFIG ======
 JIRA_URL = "https://atos-global.atlassian.net"
@@ -19,19 +18,14 @@ FIELDS = [
     "summary",
     "reporter",
     "priority",
-    "versions",                # "Affected Versions"
-    "description",             # For "Error Message" (fallback)
+    "versions",                # Affected Versions
+    # We intentionally DO NOT use description for "Error Message" (leave blank as per requirement)
     "customfield_11049",       # Customers (string or multi-select)
 ]
 
 # ====== HELPERS ======
 def nz(value, default=""):
     return default if value in (None, "") else value
-
-def to_string(value):
-    if value in (None, ""):
-        return ""
-    return str(value)
 
 def fetch_all_issues():
     """
@@ -72,27 +66,41 @@ def extract_customers(fields):
     # customfield_11049 might be a string or list
     val = fields.get("customfield_11049", [])
     if isinstance(val, list):
-        return ", ".join([nz(v) for v in val if nz(v)])
+        return ", ".join([v for v in val if v])
     return nz(val)
 
 def extract_affected_versions(fields):
+    # Format: "( <id> )  <name>"
     versions = fields.get("versions", []) or []
-    names = [nz(v.get("name")) for v in versions if isinstance(v, dict)]
-    return " ; ".join([v for v in names if v])
+    formatted = []
+    for v in versions:
+        if isinstance(v, dict):
+            vid = v.get("id")
+            name = v.get("name")
+            if vid and name:
+                formatted.append(f"( {vid} )  {name}")
+            elif name:
+                formatted.append(name)
+    return " ; ".join([x for x in formatted if x])
 
-def extract_error_message(fields):
-    # Use description (plain text snippet) as "Error Message"
-    desc = fields.get("description")
-    if isinstance(desc, dict):
-        # Sometimes Jira Cloud gives structured content; flatten a minimal text if possible
-        # Fallback: JSON-stringify
-        try:
-            return json.dumps(desc)[:500]
-        except Exception:
-            return ""
-    elif isinstance(desc, str):
-        return desc.strip()[:500]
-    return ""
+def map_priority_to_impact(priority_name: str) -> str:
+    """
+    Map Jira priority to Impact {High, Medium, Low}
+    Expedite/Highest/High -> High
+    Medium -> Medium
+    Low/Lowest -> Low
+    Fallback -> High (conservative)
+    """
+    if not priority_name:
+        return "High"
+    p = priority_name.strip().lower()
+    if p in {"expedite", "highest", "high", "urgent", "critical"}:
+        return "High"
+    if p in {"medium", "normal"}:
+        return "Medium"
+    if p in {"low", "lowest", "minor", "trivial"}:
+        return "Low"
+    return "High"
 
 def format_issue_message(issue):
     fields = issue.get("fields", {}) or {}
@@ -105,18 +113,24 @@ def format_issue_message(issue):
     summary = nz(fields.get("summary"))
     customers = extract_customers(fields)
     affected_versions = extract_affected_versions(fields)
-    error_message = extract_error_message(fields)
-    priority = (fields.get("priority") or {}).get("name") if isinstance(fields.get("priority"), dict) else ""
-    impact = nz(priority)  # Using Priority as Impact as discussed
 
-    # Your requested format:
+    # Impact: mapped from Priority
+    priority_name = ""
+    if isinstance(fields.get("priority"), dict):
+        priority_name = fields["priority"].get("name") or ""
+    impact = map_priority_to_impact(priority_name)
+
+    # Error Message: intentionally blank per requirement
+    error_message = ""
+
+    # Ensure hard newlines for Teams
     lines = [
         "New JIRA Bug in VCS project (within last 12 hours)",
         f"{reporter_name} created new bug: {url}",
         f"Summary: {summary}",
         f"Customer/s: {customers}",
         f"Affected Versions: {affected_versions}",
-        "Error Message: " + (error_message if error_message else ""),
+        "Error Message: ",
         f"Impact: {impact}",
     ]
     return "\n".join(lines).strip()
