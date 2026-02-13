@@ -2,7 +2,7 @@ name: Bug New (Last 12h) Report
 
 on:
   schedule:
-    - cron: "0 */1 * * *"      # every hour
+    - cron: "0 */12 * * *"      # every hour
   workflow_dispatch:
 
 permissions:
