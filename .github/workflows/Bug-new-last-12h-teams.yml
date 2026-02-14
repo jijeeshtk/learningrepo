@@ -1,4 +1,4 @@
-name: Bug New (Last 12h) Report
+name: "[JIRA VCS] New-bug-report(Last 12h)"
 
 on:
   schedule:
