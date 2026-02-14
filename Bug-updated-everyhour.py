@@ -14,7 +14,7 @@ JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")                       # Variables
 JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")                      # Secrets
 TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL")# Variables
 
-LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "48"))
+LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "2"))
 DEFAULT_JQL = f'project = VCS AND type IN (Bug, Defect) AND updated >= -{LOOKBACK_HOURS}h'
 JQL = os.getenv("JQL", DEFAULT_JQL)
 
