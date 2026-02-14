@@ -10,13 +10,18 @@ JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
 TEAMS_WEBHOOK_URL = os.getenv("TEAMS_WEBHOOK_URL")
 
 LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "48"))
+# IMPORTANT: plain >= (no HTML entities)
 DEFAULT_JQL = f'project = VCS AND type IN (Bug, Defect) AND updated >= -{LOOKBACK_HOURS}h'
 JQL = os.getenv("JQL", DEFAULT_JQL)
 
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "15"))
 DRY_RUN = os.getenv("DRY_RUN", "0") == "1"
 
-SEARCH_URL = f"{JIRA_URL}/rest/api/3/search"
+# New, supported endpoint (old /rest/api/3/search is retired)
+# Uses nextPageToken pagination
+SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"  # ← required now
+
+# Request fields explicitly; new API returns IDs by default
 FIELDS = [
     "summary","issuetype","status","priority","assignee","reporter","customfield_10014",
     "created","resolutiondate","customfield_10020","versions","fixVersions","customfield_11049",
@@ -36,17 +41,35 @@ def safe_date(value):
 def fetch_all_issues(jql: str) -> List[Dict]:
     if not JIRA_USER or not JIRA_TOKEN:
         print("ERROR: Jira credentials missing.", file=sys.stderr); sys.exit(2)
-    headers = {"Accept": "application/json"}; auth = (JIRA_USER, JIRA_TOKEN)
-    issues, start_at, max_results = [], 0, 50
+    headers = {"Accept": "application/json"}
+    auth = (JIRA_USER, JIRA_TOKEN)
+
+    issues = []
+    next_token = None
+    max_results = 50
+
     while True:
-        params = {"jql": jql, "maxResults": max_results, "startAt": start_at, "fields": ",".join(FIELDS)}
+        params = {
+            "jql": jql,
+            "maxResults": max_results,
+            "fields": ",".join(FIELDS),
+        }
+        if next_token:
+            params["nextPageToken"] = next_token
+
         resp = requests.get(SEARCH_URL, headers=headers, auth=auth, params=params, timeout=30)
         if resp.status_code >= 400:
-            print(f"ERROR: Jira search failed {resp.status_code}: {resp.text}", file=sys.stderr); sys.exit(3)
-        data = resp.json(); batch = data.get("issues", []) or []; issues.extend(batch)
-        total = data.get("total", 0); got = data.get("maxResults", len(batch)) or len(batch)
-        if start_at + got >= total or not batch: break
-        start_at += got
+            print(f"ERROR: Jira search failed {resp.status_code}: {resp.text}", file=sys.stderr)
+            sys.exit(3)
+
+        data = resp.json()
+        batch = data.get("issues", []) or []
+        issues.extend(batch)
+
+        next_token = data.get("nextPageToken")
+        if not next_token:
+            break
+
     return issues
 
 def format_issue(issue: Dict) -> Dict:
