@@ -5,16 +5,11 @@ import requests
 # ====== CONFIG ======
 JIRA_URL = "https://atos-global.atlassian.net"
 
-# Pull JIRA user email from variables
-JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")
+# Read envs (must be provided by workflow/job env)
+JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")                  # Variables
+JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")                 # Secrets
+TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")  # Variables
 
-# Pull JIRA API token from secrets
-JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
-
-# Pull Teams webhook from variables
-TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")
-
-# Jira search endpoint (canonical)
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search"
 
 # New Bugs/Defects created in last 12 hours
@@ -25,9 +20,39 @@ FIELDS = [
     "summary",
     "reporter",
     "priority",
-    "versions",                # Affected Versions
-    "customfield_11049",       # Customers (string or multi-select)
+    "versions",          # Affected Versions
+    "customfield_11049", # Customers (string or multi-select)
 ]
+
+# ====== ENV CHECK ======
+def assert_required_env():
+    """
+    Checks env presence without printing secret values.
+    Raises an error with the list of missing keys so the workflow can be fixed quickly.
+    """
+    required = {
+        "JIRA_VCS_API_EMAIL": JIRA_USER,
+        "JIRA_VCS_API_TOKEN": JIRA_TOKEN,
+        # Teams webhook is optional for runtime (prints to console if absent),
+        # but if you want it to be mandatory, uncomment next line.
+        # "JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL": TEAMS_WEBHOOK_URL,
+    }
+    missing = [k for k, v in required.items() if not v]
+    if missing:
+        # Print presence for all three (yes/no), but don't print actual values
+        def present(k):
+            return "yes" if os.getenv(k) else "no"
+        diag = [
+            f"Env presence → "
+            f"JIRA_VCS_API_EMAIL: {present('JIRA_VCS_API_EMAIL')}, "
+            f"JIRA_VCS_API_TOKEN: {present('JIRA_VCS_API_TOKEN')}, "
+            f"JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL: {present('JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL')}"
+        ]
+        raise RuntimeError(
+            "Missing required environment variables: " + ", ".join(missing) +
+            ". Ensure your GitHub Actions job maps repo/org Variables/Secrets to the job env.\n" +
+            "\n".join(diag)
+        )
 
 # ====== HELPERS ======
 def nz(value, default=""):
@@ -62,7 +87,6 @@ def fetch_all_issues():
         batch = data.get("issues", []) or []
         issues.extend(batch)
 
-        # End when fewer than requested returned
         if len(batch) < max_results:
             break
 
@@ -174,6 +198,7 @@ def post_to_teams_card(issue_text_lines):
         print(f"Teams post failed: {e}\nResponse: {resp.text}")
 
 def main():
+    assert_required_env()
     issues = fetch_all_issues()
     if not issues:
         print("No new Bugs/Defects in last 12 hours. Nothing to post.")
