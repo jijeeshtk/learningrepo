@@ -235,7 +235,7 @@ def write_summary(total: int, batches: int, lookback: int, sample_keys: List[str
     if not path:
         return
     with open(path, "a", encoding="utf-8") as f:
-        f.write(f"### Bug Updated Report\n")
+        f.write(f"### Bug Resolved Report\n")
         f.write(f"- Lookback: **{lookback}h**\n")
         f.write(f"- Total issues: **{total}**\n")
         f.write(f"- Batches sent: **{batches}**\n")
