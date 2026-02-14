@@ -4,30 +4,25 @@ import json, os, sys, time, requests
 from datetime import datetime
 from typing import List, Dict
 
-# ---------- Inputs (now using your new names) ----------
+# ---------- Inputs (mapped from your Actions env) ----------
 JIRA_URL = os.getenv("JIRA_URL", "https://atos-global.atlassian.net").rstrip("/")
-JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")           # NEW name
-JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")          # NEW name
-
-# Read Teams webhook from the new name; fallback kept for flexibility
-TEAMS_WEBHOOK_URL = (
-    os.getenv("JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL")    # NEW name
-    or os.getenv("TEAMS_WEBHOOK_URL")
-)
+JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")                 # from Variables
+JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")                # from Secrets
+TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL")  # from Variables
 
 LOOKBACK_HOURS = int(os.getenv("LOOKBACK_HOURS", "48"))
-DEFAULT_JQL = f'project = VCS AND type IN (Bug, Defect) AND updated >= -{LOOKBACK_HOURS}h'  # plain >=
+# IMPORTANT: plain >= (no HTML entities)
+DEFAULT_JQL = f'project = VCS AND type IN (Bug, Defect) AND updated >= -{LOOKBACK_HOURS}h'
 JQL = os.getenv("JQL", DEFAULT_JQL)
 
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "15"))
 DRY_RUN = os.getenv("DRY_RUN", "0") == "1"
 DEBUG = os.getenv("DEBUG", "0") == "1"
 
-# ---------- Jira Enhanced Search endpoint (required now) ----------
-# NOTE: /rest/api/3/search is retired across Cloud tenants; use /search/jql with nextPageToken pagination.
+# ---------- Jira Enhanced Search endpoint (token pagination) ----------
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
-# Explicit fields (the new API returns only IDs by default unless you request fields)
+# Explicit fields (new API returns only IDs unless you request fields)
 FIELDS = [
     "summary","issuetype","status","priority","assignee","reporter","customfield_10014",
     "created","resolutiondate","customfield_10020","versions","fixVersions","customfield_11049",
