@@ -4,22 +4,24 @@ import requests
 
 # ====== CONFIG ======
 JIRA_URL = "https://atos-global.atlassian.net"
-JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")  # was JIRA_USER
-JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN") # was JIRA_TOKEN
-TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")  # was TEAMS_WEBHOOK_URL
 
-SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
+# Read envs (Variables/Secrets)
+JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")                  # Variables
+JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")                 # Secrets
+TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")  # Variables
 
-# New Bugs/Defects created in last 12 hours
-JQL = 'project = VCS AND type IN (Bug, Defect) AND created &gt;= -12h ORDER BY created DESC'
+SEARCH_URL = f"{JIRA_URL}/rest/api/3/search"
+
+# New Bugs/Defects created in last 12 hours (NOTE: use >= not &gt;=)
+JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -12h ORDER BY created DESC'
 
 # Fields required for formatting the message
 FIELDS = [
     "summary",
     "reporter",
     "priority",
-    "versions",                # Affected Versions
-    "customfield_11049",       # Customers (string or multi-select)
+    "versions",          # Affected Versions
+    "customfield_11049", # Customers (string or multi-select)
 ]
 
 # ====== HELPERS ======
@@ -28,36 +30,49 @@ def nz(value, default=""):
 
 def fetch_all_issues():
     """
-    Query Jira GET /rest/api/3/search/jql (new style) with pagination using nextPageToken if present.
+    Query Jira POST /rest/api/3/search with pagination (startAt/maxResults).
+    Using POST avoids 400/410 caused by URL-encoded JQL and deprecated GET styles.
     """
     if not JIRA_USER or not JIRA_TOKEN:
         raise RuntimeError("JIRA_VCS_API_EMAIL/JIRA_VCS_API_TOKEN not set in environment variables")
 
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
     auth = (JIRA_USER, JIRA_TOKEN)
 
     issues = []
-    next_token = None
+    start_at = 0
+    max_results = 50
+    total = None
 
     while True:
-        params = {
+        body = {
             "jql": JQL,
-            "maxResults": 50,
-            "fields": ",".join(FIELDS),
+            "startAt": start_at,
+            "maxResults": max_results,
+            "fields": FIELDS,  # Array form is fine in POST body
         }
-        if next_token:
-            params["nextPageToken"] = next_token
 
-        resp = requests.get(SEARCH_URL, headers=headers, auth=auth, params=params)
-        resp.raise_for_status()
+        resp = requests.post(SEARCH_URL, headers=headers, auth=auth, data=json.dumps(body))
+        if not resp.ok:
+            # Bubble up helpful diagnostics (no secrets printed)
+            raise RuntimeError(
+                f"Jira search failed: HTTP {resp.status_code} {resp.reason}\n"
+                f"URL: {SEARCH_URL}\n"
+                f"Body: {json.dumps(body, ensure_ascii=False)}\n"
+                f"Response: {resp.text}"
+            )
+
         data = resp.json()
+        if total is None:
+            total = data.get("total", 0)
 
         batch = data.get("issues", []) or []
         issues.extend(batch)
 
-        next_token = data.get("nextPageToken")
-        if not next_token:
+        if len(issues) >= total or len(batch) < max_results:
             break
+
+        start_at += max_results
 
     return issues
 
@@ -69,7 +84,7 @@ def extract_customers(fields):
     return nz(val)
 
 def extract_affected_versions(fields):
-    # Format: "( &lt;id&gt; )  &lt;name&gt;"
+    # Format: "( <id> )  <name>"
     versions = fields.get("versions", []) or []
     formatted = []
     for v in versions:
@@ -131,6 +146,7 @@ def format_issue_message_lines(issue):
 def post_to_teams_card(issue_text_lines):
     """
     Sends a MessageCard to Teams with bold title and reliable line breaks.
+    If webhook is not configured, prints to console instead.
     """
     if not TEAMS_WEBHOOK_URL:
         print("\n".join(issue_text_lines))
@@ -138,7 +154,8 @@ def post_to_teams_card(issue_text_lines):
         return
 
     title = issue_text_lines[0]
-    body = "&lt;br/&gt;".join(issue_text_lines[1:])
+    # Use raw <br/> (not HTML-escaped) to ensure line breaks
+    body = "<br/>".join(issue_text_lines[1:])
 
     payload = {
         "@type": "MessageCard",
