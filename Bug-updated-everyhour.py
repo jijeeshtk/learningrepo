@@ -12,7 +12,7 @@ JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"  # New endpoint
 
 # IMPORTANT: Plain JQL (no HTML entities)
-JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -2h'
+JQL = 'project = VCS AND type IN (Bug, Defect) AND updated >= -48h'
 
 # The fields you want back (same as before)
 FIELDS = [
