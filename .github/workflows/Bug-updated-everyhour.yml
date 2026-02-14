@@ -2,7 +2,7 @@ name: Bug Updated Report
 
 on:
   schedule:
-    - cron: "0 */1 * * *"   # every hour at minute 0
+    - cron: "0 */1 * * *"
   workflow_dispatch:
 
 permissions:
@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Your new names
-      JIRA_VCS_API_EMAIL: ${{ secrets.JIRA_VCS_API_EMAIL }}
+      # Your placement: EMAIL + WEBHOOK in Variables; TOKEN in Secrets
+      JIRA_VCS_API_EMAIL: ${{ vars.JIRA_VCS_API_EMAIL }}
+      JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL: ${{ vars.JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL }}
       JIRA_VCS_API_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
-      JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL: ${{ secrets.JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL }}
 
       # Optional
       JIRA_URL: "https://atos-global.atlassian.net"
@@ -42,10 +42,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
+      # Optional but helpful: verify and mask env heads
+      - name: Verify required envs are set (masked)
+        run: |
+          set -euo pipefail
+          for v in JIRA_VCS_API_EMAIL JIRA_VCS_API_TOKEN JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL; do
+            if [ -z "${!v:-}" ]; then
+              echo "Missing env: $v"
+              exit 1
+            fi
+            echo "$v present"
+          done
+
+      # In case HTML entities ever sneak into the file, sanitize before run
+      - name: Sanitize script if HTML entities present
+        run: |
+          sed -i 's/&gt;/>/g; s/&lt;/</g' Bug-updated-everyhour.py
+
       - name: Run Jira → Teams report
         run: |
-          # If your repo accidentally contains HTML entities, the next line can sanitize them.
-          # sed -i 's/&gt;/>/g; s/&lt;/</g' Bug-updated-everyhour.py
           python Bug-updated-everyhour.py
 
       - name: Upload jira.json artifact
