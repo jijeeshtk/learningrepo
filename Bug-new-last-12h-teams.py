@@ -5,14 +5,15 @@ import requests
 # ====== CONFIG ======
 JIRA_URL = "https://atos-global.atlassian.net"
 
-# Read envs (Variables/Secrets)
+# New env names (Variables/Secrets)
 JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")                  # Variables
 JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")                 # Secrets
 TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")  # Variables
 
-SEARCH_URL = f"{JIRA_URL}/rest/api/3/search"
+SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
-# New Bugs/Defects created in last 12 hours (NOTE: use >= not &gt;=)
+# New Bugs/Defects created in last 12 hours
+# IMPORTANT: Use >= (not &gt;=) to avoid 400 Bad Request
 JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -12h ORDER BY created DESC'
 
 # Fields required for formatting the message
@@ -20,8 +21,8 @@ FIELDS = [
     "summary",
     "reporter",
     "priority",
-    "versions",          # Affected Versions
-    "customfield_11049", # Customers (string or multi-select)
+    "versions",                # Affected Versions
+    "customfield_11049",       # Customers (string or multi-select)
 ]
 
 # ====== HELPERS ======
@@ -30,31 +31,31 @@ def nz(value, default=""):
 
 def fetch_all_issues():
     """
-    Query Jira POST /rest/api/3/search with pagination (startAt/maxResults).
-    Using POST avoids 400/410 caused by URL-encoded JQL and deprecated GET styles.
+    Query Jira POST /rest/api/3/search/jql with pagination using nextPageToken.
     """
     if not JIRA_USER or not JIRA_TOKEN:
         raise RuntimeError("JIRA_VCS_API_EMAIL/JIRA_VCS_API_TOKEN not set in environment variables")
 
-    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
     auth = (JIRA_USER, JIRA_TOKEN)
 
     issues = []
-    start_at = 0
-    max_results = 50
-    total = None
+    next_token = None
 
     while True:
         body = {
             "jql": JQL,
-            "startAt": start_at,
-            "maxResults": max_results,
-            "fields": FIELDS,  # Array form is fine in POST body
+            "maxResults": 50,
+            "fields": FIELDS,  # Array form is correct in POST body
         }
+        if next_token:
+            body["nextPageToken"] = next_token
 
         resp = requests.post(SEARCH_URL, headers=headers, auth=auth, data=json.dumps(body))
         if not resp.ok:
-            # Bubble up helpful diagnostics (no secrets printed)
             raise RuntimeError(
                 f"Jira search failed: HTTP {resp.status_code} {resp.reason}\n"
                 f"URL: {SEARCH_URL}\n"
@@ -63,16 +64,13 @@ def fetch_all_issues():
             )
 
         data = resp.json()
-        if total is None:
-            total = data.get("total", 0)
 
         batch = data.get("issues", []) or []
         issues.extend(batch)
 
-        if len(issues) >= total or len(batch) < max_results:
+        next_token = data.get("nextPageToken")
+        if not next_token:
             break
-
-        start_at += max_results
 
     return issues
 
@@ -146,7 +144,6 @@ def format_issue_message_lines(issue):
 def post_to_teams_card(issue_text_lines):
     """
     Sends a MessageCard to Teams with bold title and reliable line breaks.
-    If webhook is not configured, prints to console instead.
     """
     if not TEAMS_WEBHOOK_URL:
         print("\n".join(issue_text_lines))
@@ -154,7 +151,7 @@ def post_to_teams_card(issue_text_lines):
         return
 
     title = issue_text_lines[0]
-    # Use raw <br/> (not HTML-escaped) to ensure line breaks
+    # Use <br/> (not &lt;br/&gt;) so Teams renders line breaks
     body = "<br/>".join(issue_text_lines[1:])
 
     payload = {
