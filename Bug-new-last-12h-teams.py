@@ -3,12 +3,19 @@ import json
 import requests
 
 # ====== CONFIG ======
-JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL = "https://atos-global.atlassian.net"
-JIRA_VCS_API_EMAIL = os.getenv("JIRA_VCS_API_EMAIL")
-JIRA_VCS_API_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
-JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")
+JIRA_URL = "https://atos-global.atlassian.net"
 
-SEARCH_URL = f"{JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL}/rest/api/3/search/jql"
+# Pull JIRA user email from variables
+JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")
+
+# Pull JIRA API token from secrets
+JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
+
+# Pull Teams webhook from variables
+TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")
+
+# Standard search endpoint
+SEARCH_URL = f"{JIRA_URL}/rest/api/3/search"
 
 # New Bugs/Defects created in last 12 hours
 JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -12h ORDER BY created DESC'
@@ -28,25 +35,25 @@ def nz(value, default=""):
 
 def fetch_all_issues():
     """
-    Query Jira GET /rest/api/3/search/jql (new style) with pagination using nextPageToken if present.
+    Query Jira GET /rest/api/3/search with pagination (startAt/maxResults).
     """
-    if not JIRA_VCS_API_EMAIL or not JIRA_VCS_API_TOKEN:
+    if not JIRA_USER or not JIRA_TOKEN:
         raise RuntimeError("JIRA_VCS_API_EMAIL/JIRA_VCS_API_TOKEN not set in environment variables")
 
     headers = {"Accept": "application/json"}
-    auth = (JIRA_VCS_API_EMAIL, JIRA_VCS_API_TOKEN)
+    auth = (JIRA_USER, JIRA_TOKEN)
 
     issues = []
-    next_token = None
+    start_at = 0
+    max_results = 50
 
     while True:
         params = {
             "jql": JQL,
-            "maxResults": 50,
+            "maxResults": max_results,
+            "startAt": start_at,
             "fields": ",".join(FIELDS),
         }
-        if next_token:
-            params["nextPageToken"] = next_token
 
         resp = requests.get(SEARCH_URL, headers=headers, auth=auth, params=params)
         resp.raise_for_status()
@@ -55,9 +62,10 @@ def fetch_all_issues():
         batch = data.get("issues", []) or []
         issues.extend(batch)
 
-        next_token = data.get("nextPageToken")
-        if not next_token:
+        if len(batch) < max_results:
             break
+
+        start_at += max_results
 
     return issues
 
@@ -104,7 +112,7 @@ def map_priority_to_impact(priority_name: str) -> str:
 def format_issue_message_lines(issue):
     fields = issue.get("fields", {}) or {}
     key = (issue.get("key") or "").strip()
-    url = f"{JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL}/browse/{key}" if key else ""
+    url = f"{JIRA_URL}/browse/{key}" if key else ""
 
     reporter = fields.get("reporter") or {}
     reporter_name = (reporter.get("displayName") or reporter.get("emailAddress") or "").strip()
@@ -132,7 +140,7 @@ def post_to_teams_card(issue_text_lines):
     """
     Sends a MessageCard to Teams with bold title and reliable line breaks.
     """
-    if not JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL:
+    if not TEAMS_WEBHOOK_URL:
         print("\n".join(issue_text_lines))
         print("\n---\n")
         return
@@ -154,7 +162,7 @@ def post_to_teams_card(issue_text_lines):
     }
 
     resp = requests.post(
-        JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL,
+        TEAMS_WEBHOOK_URL,
         data=json.dumps(payload),
         headers={"Content-Type": "application/json"}
     )
