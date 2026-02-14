@@ -14,7 +14,7 @@ SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
 # New Bugs/Defects created in last 12 hours
 # IMPORTANT: Use >= (not &gt;=) to avoid 400 Bad Request
-JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -12h ORDER BY created DESC'
+JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -48h ORDER BY created DESC'
 
 # Fields required for formatting the message
 FIELDS = [
