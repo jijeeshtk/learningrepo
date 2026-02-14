@@ -2,7 +2,7 @@ name: Bug New (Last 12h) Report
 
 on:
   schedule:
-    - cron: "0 */12 * * *"      # every 12 hours
+    - cron: "0 */12 * * *"      # every hour
   workflow_dispatch:
 
 permissions:
@@ -13,13 +13,8 @@ jobs:
   jira-report:
     runs-on: ubuntu-latest
 
-    # Export EXACT env names your script reads
     env:
-      # VARIABLES
-      JIRA_VCS_API_EMAIL: ${{ vars.JIRA_VCS_API_EMAIL }}
-      JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL: ${{ vars.JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL }}
-      # SECRETS
-      JIRA_VCS_API_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
+      TEAMS_WEBHOOK_URL: ${{ vars.JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL }}
 
     steps:
       - name: Checkout repo
@@ -29,26 +24,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: 'pip'
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install requests
 
-      # Optional: Quick presence check (does not print secret values)
-      - name: Verify env presence (safe)
-        run: |
-          python - << 'PY'
-          import os
-          for k in [
-              "JIRA_VCS_API_EMAIL",
-              "JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL",
-              "JIRA_VCS_API_TOKEN",
-          ]:
-              print(f"{k} present? {'yes' if os.getenv(k) else 'no'}")
-          PY
-
       - name: Run Jira report script (posts to Teams)
+        env:
+          JIRA_USER: ${{ vars.JIRA_VCS_API_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
         run: |
           python Bug-new-last-12h-teams.py
