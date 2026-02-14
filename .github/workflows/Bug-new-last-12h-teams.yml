@@ -15,10 +15,10 @@ jobs:
 
     # Export envs with the exact names used in the script
     env:
-      # VARIABLES (moved from secrets)
+      # VARIABLES
       JIRA_VCS_API_EMAIL: ${{ vars.JIRA_VCS_API_EMAIL }}
       JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL: ${{ vars.JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL }}
-      # SECRETS (unchanged)
+      # SECRETS
       JIRA_VCS_API_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
 
     steps:
@@ -35,20 +35,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      # Optional: quick presence check (never prints secret values)
+      # Optional: presence check (never prints secret values)
       - name: Verify env presence (safe)
         run: |
           python - << 'PY'
           import os
           for k in [
-            "JIRA_VCS_API_EMAIL",
-            "JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL",
-            "JIRA_VCS_API_TOKEN",
+              "JIRA_VCS_API_EMAIL",
+              "JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL",
+              "JIRA_VCS_API_TOKEN",
           ]:
               print(f"{k} present? {'yes' if os.getenv(k) else 'no'}")
           PY
 
       - name: Run Jira report script (posts to Teams)
-        # No step-level env overrides needed since we set job-level env above
-        run: |
-          python Bug-new-last-12h-teams.py
+        run: python Bug-new-last-12h-teams.py
