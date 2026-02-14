@@ -1,4 +1,4 @@
-name: Bug Updated Report
+name: Bug Resolved Report 
 
 on:
   schedule:
