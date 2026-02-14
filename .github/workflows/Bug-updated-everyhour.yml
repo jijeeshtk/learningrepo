@@ -38,7 +38,7 @@ jobs:
 
       - name: Run Jira → Teams report
         run: |
-          python scripts/jira_bug_updates_to_teams.py
+          python Bug-updated-everyhour.py
 
       - name: Upload jira.json artifact
         if: always()
