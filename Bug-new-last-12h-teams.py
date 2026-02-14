@@ -14,7 +14,7 @@ JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
 # Pull Teams webhook from variables
 TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")
 
-# Standard search endpoint
+# Jira search endpoint (canonical)
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search"
 
 # New Bugs/Defects created in last 12 hours
@@ -62,6 +62,7 @@ def fetch_all_issues():
         batch = data.get("issues", []) or []
         issues.extend(batch)
 
+        # End when fewer than requested returned
         if len(batch) < max_results:
             break
 
@@ -139,6 +140,7 @@ def format_issue_message_lines(issue):
 def post_to_teams_card(issue_text_lines):
     """
     Sends a MessageCard to Teams with bold title and reliable line breaks.
+    If webhook is not configured, prints to console instead.
     """
     if not TEAMS_WEBHOOK_URL:
         print("\n".join(issue_text_lines))
