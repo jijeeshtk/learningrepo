@@ -6,8 +6,8 @@ from urllib.parse import quote
 
 # Jira credentials (from GitHub Secrets)
 JIRA_URL = "https://atos-global.atlassian.net"
-JIRA_USER = os.getenv("JIRA_USER")
-JIRA_TOKEN = os.getenv("JIRA_TOKEN")
+JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")
+JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN")
 
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"  # New endpoint
 
