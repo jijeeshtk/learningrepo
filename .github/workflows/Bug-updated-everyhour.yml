@@ -2,7 +2,7 @@ name: Bug Updated Report
 
 on:
   schedule:
-    - cron: "0 */1 * * *"
+    - cron: "0 */1 * * *"   # every hour at minute 0
   workflow_dispatch:
 
 permissions:
@@ -12,15 +12,21 @@ permissions:
 jobs:
   jira-report:
     runs-on: ubuntu-latest
+
     env:
-      TEAMS_WEBHOOK_URL: ${{ secrets.JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL }}
-      JIRA_VCS_API_EMAIL: ${{ vars.JIRA_VCS_API_EMAIL }}
+      # Your new names
+      JIRA_VCS_API_EMAIL: ${{ secrets.JIRA_VCS_API_EMAIL }}
       JIRA_VCS_API_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
+      JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL: ${{ secrets.JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL }}
+
+      # Optional
       JIRA_URL: "https://atos-global.atlassian.net"
       LOOKBACK_HOURS: "48"
       BATCH_SIZE: "15"
+      # To override JQL, keep it quoted and use plain >= :
       # JQL: "project = VCS AND type IN (Bug, Defect) AND updated >= -48h"
       # DRY_RUN: "1"
+      # DEBUG: "1"
 
     steps:
       - name: Checkout repo
@@ -38,6 +44,8 @@ jobs:
 
       - name: Run Jira → Teams report
         run: |
+          # If your repo accidentally contains HTML entities, the next line can sanitize them.
+          # sed -i 's/&gt;/>/g; s/&lt;/</g' Bug-updated-everyhour.py
           python Bug-updated-everyhour.py
 
       - name: Upload jira.json artifact
