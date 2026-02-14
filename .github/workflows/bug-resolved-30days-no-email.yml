@@ -1,117 +1,89 @@
-name: Bug Resolved Report
+name: Bug Updated Report
 
 on:
   schedule:
-    - cron: "0 */12 * * *"
+    - cron: "0 */1 * * *"    # every hour at minute 0
   workflow_dispatch:
 
+# Least-privilege & single-run protection
 permissions:
-  contents: write
-  actions: read
+  contents: read
+
+concurrency:
+  group: bug-updated-report
+  cancel-in-progress: false
 
 jobs:
   jira-report:
     runs-on: ubuntu-latest
 
     env:
-      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+      # Variables (email + webhook) and Secrets (token)
+      JIRA_VCS_API_EMAIL: ${{ vars.JIRA_VCS_API_EMAIL }}
+      JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL: ${{ vars.JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL }}
+      JIRA_VCS_API_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
+
+      # Optional knobs
+      JIRA_URL: "https://atos-global.atlassian.net"
+      LOOKBACK_HOURS: "30"
+      BATCH_SIZE: "15"
+      # Keep quoted if you override and always use plain >= :
+      # JQL: "project = VCS AND type IN (Bug, Defect) AND resolutiondate >= -30d"
+      # DRY_RUN: "1"
+      DEBUG: "1"  # enable structured debug logs by default for now
+      TEAMS_MODE: "text"  # "text" | "card" (Adaptive Card)
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-py312-requests-2.31
+          restore-keys: |
+            pip-${{ runner.os }}-py312-
+
+      - name: Install dependencies (pinned)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-          pip install requests
+          python -m pip install --upgrade pip
+          pip install "requests==2.31.0" "urllib3<2.2"  # stable combo for GH runners
 
-      - name: Run Jira report script
-        env:
-          JIRA_USER: ${{ secrets.JIRA_USER }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python bug-resolved-30days.py
-
-      - name: Normalize JSON (null → "")
-        run: |
-          jq '(.. | select(. == null)) |= ""' jira_report.json > fixed.json
-          mv fixed.json jira_report.json
-
-      - name: Commit JSON for audit
-        run: |
-          TS=$(date -u +%Y-%m-%dT%H%M%SZ)
-          mkdir -p reports
-          cp jira_report.json reports/jira_report_${TS}.json
-          cp jira_report.json reports/jira_report_latest.json
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add reports/jira_report_${TS}.json reports/jira_report_latest.json
-          git commit -m "Jira report updated ${TS}" || true
-          git push || true
-
-      - name: Send issues to Teams in batches of 15 (pretty JSON + code block)
-        if: env.TEAMS_WEBHOOK_URL != ''
-        shell: bash
+      # Prove envs are present (masked)
+      - name: Verify required envs are set (masked)
         run: |
           set -euo pipefail
-
-          if [ -z "${TEAMS_WEBHOOK_URL:-}" ]; then
-            echo "Webhook not set; skipping Teams."
-            exit 0
-          fi
-
-          jq '.issues' jira_report.json > /tmp/issues.json
-          TOTAL=$(jq 'length' /tmp/issues.json)
-          BATCH_SIZE=15
-          TOTAL_BATCHES=$(( (TOTAL + BATCH_SIZE - 1) / BATCH_SIZE ))
-
-          echo "Total issues: $TOTAL"
-          echo "Batch size  : $BATCH_SIZE"
-          echo "Batches     : $TOTAL_BATCHES"
-
-          index=0
-          batch=1
-
-          while [ "$index" -lt "$TOTAL" ]; do
-
-            end=$(( index + BATCH_SIZE ))
-            if [ "$end" -gt "$TOTAL" ]; then end="$TOTAL"; fi
-
-            echo "Preparing Batch $batch/$TOTAL_BATCHES (items $((index+1))..$end)"
-
-            # Slice issues → tmp/issues_batch.json
-            jq ".[$index:$end]" /tmp/issues.json > /tmp/issues_batch.json
-
-            # Build exact structure { "issues": [...] }
-            jq -n --slurpfile s /tmp/issues_batch.json '{ issues: $s[0] }' > /tmp/batch.json
-
-            # Pretty print EXACTLY like your single working version
-            jq '.' /tmp/batch.json > /tmp/pretty.json
-
-            # Build Teams payload → header + code block + pretty JSON
-            jq -n \
-              --arg header "Batch $batch/$TOTAL_BATCHES (items $((index+1))..$end)" \
-              --rawfile body /tmp/pretty.json \
-              '{ text: ($header + "\n```json\n" + $body + "\n```") }' \
-              > /tmp/payload.json
-
-            echo "Sending Batch $batch..."
-            curl -sS -H "Content-Type: application/json" \
-                 -d @/tmp/payload.json \
-                 "$TEAMS_WEBHOOK_URL"
-
-            # Small delay helps Teams process sequential messages
-            sleep 2
-
-            index=$end
-            batch=$(( batch + 1 ))
+          for v in JIRA_VCS_API_EMAIL JIRA_VCS_API_TOKEN JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL; do
+            if [ -z "${!v:-}" ]; then
+              echo "Missing env: $v"
+              exit 1
+            fi
+            echo "$v present"
           done
 
-          echo "All batches sent successfully."
+      # Defensive: normalize any HTML entities that may be in the file
+      - name: Sanitize script if HTML entities present
+        run: |
+          sed -i 's/&amp;gt;/>/g; s/&amp;lt;/</g; s/&gt;/>/g; s/&lt;/</g' bug-resolved-30days.py
+
+      - name: Run Jira → Teams report
+        env:
+          GITHUB_STEP_SUMMARY: ${{ github.step_summary }}
+        run: |
+          set -euo pipefail
+          python bug-resolved-30days.py
+
+      # Keep JSON as artifact for auditing
+      - name: Upload jira.json artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-bug-resolved-report
+          path: jira.json
+          retention-days: 7
