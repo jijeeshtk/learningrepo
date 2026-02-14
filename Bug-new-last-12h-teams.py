@@ -4,14 +4,14 @@ import requests
 
 # ====== CONFIG ======
 JIRA_URL = "https://atos-global.atlassian.net"
-JIRA_USER = os.getenv("JIRA_USER")
-JIRA_TOKEN = os.getenv("JIRA_TOKEN")
-TEAMS_WEBHOOK_URL = os.getenv("TEAMS_WEBHOOK_URL")
+JIRA_USER = os.getenv("JIRA_VCS_API_EMAIL")  # was JIRA_USER
+JIRA_TOKEN = os.getenv("JIRA_VCS_API_TOKEN") # was JIRA_TOKEN
+TEAMS_WEBHOOK_URL = os.getenv("JIRA_VCS_BUG_OPEN_ALERT_TEAM_URL")  # was TEAMS_WEBHOOK_URL
 
 SEARCH_URL = f"{JIRA_URL}/rest/api/3/search/jql"
 
 # New Bugs/Defects created in last 12 hours
-JQL = 'project = VCS AND type IN (Bug, Defect) AND created >= -12h ORDER BY created DESC'
+JQL = 'project = VCS AND type IN (Bug, Defect) AND created &gt;= -12h ORDER BY created DESC'
 
 # Fields required for formatting the message
 FIELDS = [
@@ -31,7 +31,7 @@ def fetch_all_issues():
     Query Jira GET /rest/api/3/search/jql (new style) with pagination using nextPageToken if present.
     """
     if not JIRA_USER or not JIRA_TOKEN:
-        raise RuntimeError("JIRA_USER/JIRA_TOKEN not set in environment variables")
+        raise RuntimeError("JIRA_VCS_API_EMAIL/JIRA_VCS_API_TOKEN not set in environment variables")
 
     headers = {"Accept": "application/json"}
     auth = (JIRA_USER, JIRA_TOKEN)
@@ -69,7 +69,7 @@ def extract_customers(fields):
     return nz(val)
 
 def extract_affected_versions(fields):
-    # Format: "( <id> )  <name>"
+    # Format: "( &lt;id&gt; )  &lt;name&gt;"
     versions = fields.get("versions", []) or []
     formatted = []
     for v in versions:
@@ -138,7 +138,7 @@ def post_to_teams_card(issue_text_lines):
         return
 
     title = issue_text_lines[0]
-    body = "<br/>".join(issue_text_lines[1:])
+    body = "&lt;br/&gt;".join(issue_text_lines[1:])
 
     payload = {
         "@type": "MessageCard",
