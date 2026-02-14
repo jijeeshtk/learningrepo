@@ -2,7 +2,7 @@ name: Bug Updated Report
 
 on:
   schedule:
-    - cron: "0 */1 * * *"
+    - cron: "0 */1 * * *" # every hour at minute 0
   workflow_dispatch:
 
 permissions:
@@ -12,64 +12,42 @@ permissions:
 jobs:
   jira-report:
     runs-on: ubuntu-latest
-
     env:
-      TEAMS_WEBHOOK_URL: ${{ vars.JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL }}
+      # Use SECRETS for sensitive values
+      TEAMS_WEBHOOK_URL: ${{ secrets.JIRA_VCS_BUG_CLOSE_ALERT_TEAM_URL }}
+      JIRA_VCS_API_EMAIL: ${{ vars.JIRA_VCS_API_EMAIL }}
+      JIRA_VCS_API_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
+      # Optional overrides
+      JIRA_URL: https://atos-global.atlassian.net
+      LOOKBACK_HOURS: "48"
+      BATCH_SIZE: "15"
+      # JQL: 'project = VCS AND type IN (Bug, Defect) AND updated >= -48h' # uncomment to override
+      # DRY_RUN: "1"  # uncomment for testing without posting
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-          pip install requests
+            python -m pip install --upgrade pip
+            pip install requests
 
-      - name: Run Jira report script (prints JSON)
-        env:
-          JIRA_USER: ${{ vars.JIRA_VCS_API_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_VCS_API_TOKEN }}
-        run: python Bug-updated-everyhour.py > jira.json
-
-      - name: Send issues to Teams in batches of 15
-        if: env.TEAMS_WEBHOOK_URL != ''
-        shell: bash
+      - name: Run Jira → Teams report
         run: |
-          jq '.issues' jira.json > /tmp/issues.json
-          TOTAL=$(jq 'length' /tmp/issues.json)
-          BATCH_SIZE=15
-          TOTAL_BATCHES=$(( (TOTAL + BATCH_SIZE - 1) / BATCH_SIZE ))
+          python scripts/jira_bug_updates_to_teams.py
 
-          index=0
-          batch=1
-
-          while [ "$index" -lt "$TOTAL" ]; do
-            end=$(( index + BATCH_SIZE ))
-            if [ "$end" -gt "$TOTAL" ]; then end="$TOTAL"; fi
-
-            jq ".[$index:$end]" /tmp/issues.json > /tmp/issues_batch.json
-            jq -n --slurpfile s /tmp/issues_batch.json '{ issues: $s[0] }' > /tmp/batch.json
-            jq '.' /tmp/batch.json > /tmp/pretty.json
-
-            jq -n \
-              --arg header "Batch $batch/$TOTAL_BATCHES (items $((index+1))..$end)" \
-              --rawfile body /tmp/pretty.json \
-              '{ text: ($header + "\n```json\n" + $body + "\n```") }' \
-              > /tmp/payload.json
-
-            curl -sS -H "Content-Type: application/json" \
-                 -d @/tmp/payload.json \
-                 "$TEAMS_WEBHOOK_URL"
-
-            sleep 2
-            index=$end
-            batch=$(( batch + 1 ))
-          done
-
-          echo "All batches sent successfully."
+      # Optional: Upload the JSON for auditing
+      - name: Upload jira.json artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jira-bug-updated-report
+          path: jira.json
+          retention-days: 3
+``
