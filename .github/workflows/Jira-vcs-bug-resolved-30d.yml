@@ -2,7 +2,7 @@ name: "[JIRA VCS] Bug-resolved-report(-30d)"
 
 on:
   schedule:
-    - cron: "0 * * * *"      # every 1 hours
+    - cron: "0 */1 * * *"      # every 1 hours
   workflow_dispatch:
 
 # Least-privilege & single-run protection
