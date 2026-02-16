@@ -2,7 +2,7 @@
 name: Cron Smoke
 on:
   schedule:
-    - cron: "*/15 * * * *"  # every 15 min UTC
+    - cron: "0 */1 * * *"  # every 15 min UTC
   workflow_dispatch:
 
 jobs:
