@@ -1,0 +1,31 @@
+baseURL = "/"
+title = "Homelab Documentation"
+theme = "geekdoc"
+relativeURLs = true
+uglyURLs = true
+DefaultContentLanguage = "en"
+
+[module]
+[[module.mounts]]
+  source = 'main'
+  target = 'content'
+[[module.mounts]]
+  source = 'design'
+  target = 'content/design'
+[[module.mounts]]
+  source = 'workInstructions'
+  target = 'content/workinstructions'
+[[module.mounts]]
+  source = 'design/images'
+  target = 'static/images'
+[[module.mounts]]
+  source = 'workInstructions/images'
+  target = 'static/images'
+
+[Params]
+  geekdocSearch = true
+  geekdocToC = true
+  geekdocCollapseAllSections = false
+
+[Author]
+  name = "homelab"
