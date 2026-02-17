@@ -1,4 +1,6 @@
-baseURL = "/"
+# For absolute URLs, uncomment the next line:
+# baseURL = "https://jijeeshhomelab.github.io/learningrepo/"
+
 title = "Homelab Documentation"
 theme = "geekdoc"
 relativeURLs = true
