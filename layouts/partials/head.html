@@ -1,0 +1,25 @@
+{{- /* Override Docsy head partial to remove GA async template */ -}}
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{{ if .Title }}{{ .Title }} | {{ end }}{{ .Site.Title }}</title>
+
+  {{- /* Standard Hugo internal templates */ -}}
+  {{ template "_internal/opengraph.html" . }}
+  {{ template "_internal/twitter_cards.html" . }}
+
+  {{- /* Stylesheets */ -}}
+  {{ $styles := resources.Get "scss/main.scss" | toCSS (dict "targetPath" "css/main.css") | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ $styles.RelPermalink }}" integrity="{{ $styles.Data.Integrity }}">
+
+  {{- /* Google Analytics (disabled for now to avoid error) */ -}}
+  {{ with .Site.Params.googleAnalytics }}
+    {{ if . }}
+      {{ template "_internal/google_analytics.html" . }}
+    {{ end }}
+  {{ end }}
+</head>
+<body>
