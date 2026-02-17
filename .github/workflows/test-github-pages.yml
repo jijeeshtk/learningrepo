@@ -7,5 +7,4 @@ on:
 jobs:
   test:
     uses: jijeeshhomelab/learningrepo/.github/workflows/test-build-pages.yml@main
-    secrets:
-      GH_ACTIONS_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
+    secrets: inherit   # <-- no need for GH_ACTIONS_TOKEN here
