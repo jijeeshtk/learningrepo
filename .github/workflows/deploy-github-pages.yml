@@ -1,0 +1,16 @@
+name: 📖 Deploy GitHub Pages Using Hugo
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  deploy:
+    uses: jijeeshhomelab/learningrepo/.github/workflows/hugo-pages.yml@main
+    permissions:
+      contents: write
+    secrets:
+      GH_ACTIONS_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
