@@ -1,28 +1,36 @@
+name: Reusable - Docsy Build & Deploy
+
+on:
+  workflow_call:
+    inputs:
+      publish_branch:
+        type: string
+        required: false
+        default: gh-pages
+
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          submodules: true
-          fetch-depth: 0
+          submodules: true     # important for themes/docsy
+          fetch-depth: 0       # full history for Hugo modules
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: latest
-          extended: true
+          extended: true       # Docsy requires Hugo Extended
 
       - name: Download Hugo Modules
-        run: hugo mod tidy
+        run: hugo mod tidy     # fetch Docsy + dependencies (Font Awesome, etc.)
 
       - name: Build site
         run: hugo --minify
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: ${{ inputs.publish_branch }}
+      - name
