@@ -24,7 +24,6 @@ DefaultContentLanguage = "en"
     source = 'workInstructions/images'
     target = 'static/images'
 
-  # Add Docsy + dependencies as Hugo modules
   [[module.imports]]
     path = "github.com/google/docsy"
   [[module.imports]]
@@ -32,11 +31,11 @@ DefaultContentLanguage = "en"
   [[module.imports]]
     path = "github.com/FortAwesome/Font-Awesome"
 
-[Params]
-  # These are Geekdoc params; you may want to remove them later
+[params]
+  # Replace Geekdoc params with Docsy equivalents later
   geekdocSearch = true
   geekdocToC = true
   geekdocCollapseAllSections = false
 
-[Author]
-  name = "homelab"
+  # Correct way to set author
+  author = "homelab"
