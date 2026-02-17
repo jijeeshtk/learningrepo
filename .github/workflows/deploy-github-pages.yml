@@ -12,5 +12,4 @@ jobs:
     uses: jijeeshhomelab/learningrepo/.github/workflows/hugo-pages.yml@main
     permissions:
       contents: write
-    secrets:
-      GH_ACTIONS_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
+    secrets: inherit   # <-- pass built-in GITHUB_TOKEN automatically
