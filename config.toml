@@ -2,7 +2,7 @@
 # baseURL = "https://jijeeshhomelab.github.io/learningrepo/"
 
 title = "Homelab Documentation"
-theme = "geekdoc"
+theme = "docsy"
 relativeURLs = true
 uglyURLs = true
 DefaultContentLanguage = "en"
