@@ -1,6 +1,0 @@
-[submodule "themes/geekdoc"]
-    path = themes/geekdoc
-    url = https://github.com/thegeeklab/hugo-geekdoc.git
-[submodule "themes/docsy"]
-	path = themes/docsy
-	url = https://github.com/google/docsy.git
