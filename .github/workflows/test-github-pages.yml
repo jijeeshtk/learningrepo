@@ -6,6 +6,6 @@ on:
 
 jobs:
   test:
-    uses: jijeeshtk/Mylearning/.github/workflows/test-build-pages.yml@main
+    uses: jijeeshhomelab/learningrepo/.github/workflows/test-build-pages.yml@main
     secrets:
       GH_ACTIONS_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
