@@ -7,9 +7,6 @@ on:
         type: string
         required: false
         default: gh-pages
-    secrets:
-      GH_ACTIONS_TOKEN:
-        required: false
 
 jobs:
   build-deploy:
@@ -36,6 +33,6 @@ jobs:
       - name: Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GH_ACTIONS_TOKEN || secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}   # <-- use built-in token
           publish_dir: ./public
           publish_branch: ${{ inputs.publish_branch }}
