@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    uses: jijeeshtk/Mylearning/.github/workflows/hugo-pages.yml@main
+    uses: jijeeshhomelab/learningrepo/.github/workflows/hugo-pages.yml@main
     permissions:
       contents: write
     secrets:
