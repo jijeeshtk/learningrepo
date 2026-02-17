@@ -1,3 +1,3 @@
 [submodule "themes/geekdoc"]
 	path = themes/geekdoc
-	url = git@github-personal:thegeeklab/hugo-geekdoc.git
+	url = git@github.com/thegeeklab/hugo-geekdoc.git
