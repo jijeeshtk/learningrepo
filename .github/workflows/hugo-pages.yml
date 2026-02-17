@@ -33,7 +33,7 @@ jobs:
       - name: Build site
         run: hugo --minify
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GH_ACTIONS_TOKEN || secrets.GITHUB_TOKEN }}
