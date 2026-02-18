@@ -1,0 +1,3 @@
+[submodule "themes/aec-documentation"]
+	path = themes/aec-documentation
+	url = git@github-personal:jijeeshhomelab/aec-documentation
