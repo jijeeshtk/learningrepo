@@ -1,5 +1,5 @@
 title = "Learning Repo Documentation"
-baseURL = "/"
+baseURL = ""
 relativeurls = true
 uglyurls = true
 
@@ -11,15 +11,17 @@ pygmentCodeFences = true
 theme = "aec-documentation"
 disableSearch = true
 
-#
-# ⭐ CRITICAL FIX ⭐
-# You are using module mounts → Hugo enters module mode →
-# theme MUST be imported under module.imports
-#
+# -------------------------------
+# Hugo Module Mode
+# Required because you mount folders as content sources
+# -------------------------------
 [module]
+
+  # Load theme as a Hugo module (CRITICAL)
   [[module.imports]]
     path = "aec-documentation"
 
+  # Mount your actual directories into Hugo's content tree
   [[module.mounts]]
     source = 'main'
     target = 'content'
@@ -28,7 +30,6 @@ disableSearch = true
     source = 'design'
     target = 'content/design'
 
-  # ⚠ Match your folder name exactly (workInstructions)
   [[module.mounts]]
     source = 'workInstructions'
     target = 'content/workinstructions'
@@ -41,8 +42,12 @@ disableSearch = true
     source = 'workInstructions/images'
     target = 'static/images'
 
+
+# -------------------------------
+# Site Params (Matches production)
+# -------------------------------
 [Params]
-  subtitle = "Learning Repo DEV Documentation"
+  subtitle = "Learning Repo Documentation"
   logo = "img/avatar-icon.png"
   favicon = "img/favicon.ico"
   dateFormat = "January 2, 2006"
@@ -50,6 +55,9 @@ disableSearch = true
   rss = true
   comments = true
 
+# -------------------------------
+# Markup (from production)
+# -------------------------------
 [markup]
   [markup.goldmark.extensions]
     definitionList = true
@@ -68,5 +76,8 @@ disableSearch = true
     ordered = false
     startLevel = 1
 
+# -------------------------------
+# Author (not important but included)
+# -------------------------------
 [Author]
   name = "Learning Repo Dev"
