@@ -1,11 +1,12 @@
+
 ---
 title: "main - Documentation"
 ---
 
 Please use the following links or the sidebar to navigate the documentation.
 
-## [Design Documentation](design.html)
+## design.html
 
-## [Work Instructions](workinstructions.html)
+## workinstructions.html
 
-## [Read a different version of VCS Documentation](..)
+## ..
