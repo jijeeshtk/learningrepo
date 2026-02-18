@@ -27,15 +27,60 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout hugo-pages branch
+        uses: actions/checkout@v4
         with:
           ref: hugo-pages
 
-      - uses: actions/configure-pages@v5
+      # ---------------------------------------------------------
+      # ⭐ NEW STEP: Generate Root Version Index (DEV ONLY)
+      # ---------------------------------------------------------
+      - name: Generate root index.html
+        run: |
+          versions=$(find . -maxdepth 1 -type d ! -name "." ! -name ".git" | sed 's|^\./||' | sort)
 
-      - uses: actions/upload-pages-artifact@v3
+          cat > index.html << 'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <title>Learning Repo Documentation Versions</title>
+            <style>
+              body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial,sans-serif;margin:2rem;line-height:1.6}
+              h1{font-size:1.9rem;margin-bottom:1rem}
+              ul{margin-top:1rem;padding-left:1.2rem}
+              a{color:#0a58ca;text-decoration:none;font-size:1.1rem}
+              a:hover{text-decoration:underline}
+            </style>
+          </head>
+          <body>
+            <h1>Documentation Versions</h1>
+            <p>Select the version or branch documentation:</p>
+            <ul>
+          EOF
+
+          for v in $versions; do
+            echo "<li><a href=\"./$v/\">$v</a></li>" >> index.html
+          done
+
+          cat >> index.html << 'EOF'
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      # ---------------------------------------------------------
+      # Publish folder content as GitHub Pages artifact
+      # ---------------------------------------------------------
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
-      - id: deployment
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
