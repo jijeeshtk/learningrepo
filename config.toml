@@ -1,0 +1,62 @@
+title = "Learning Repo Documentation"
+relativeurls = true
+uglyurls = true
+
+DefaultContentLanguage = "en"
+theme = "aec-documentation"
+metaDataFormat = "yaml"
+pygmentsUseClasses = true
+pygmentCodeFences = true
+
+disableSearch = true
+
+[module]
+  [[module.mounts]]
+    source = 'main'
+    target = 'content'
+
+  [[module.mounts]]
+    source = 'design'
+    target = 'content/design'
+
+  [[module.mounts]]
+    source = 'workInstructions'
+    target = 'content/workinstructions'
+
+  [[module.mounts]]
+    source = 'design/images'
+    target = 'static/images'
+
+  [[module.mounts]]
+    source = 'workInstructions/images'
+    target = 'static/images'
+
+[Params]
+  subtitle = "Learning Repo DEV Documentation"
+  logo = "img/avatar-icon.png"
+  favicon = "img/favicon.ico"
+  dateFormat = "January 2, 2006"
+  commit = false
+  rss = true
+  comments = true
+
+[markup]
+  [markup.goldmark.extensions]
+    definitionList = true
+    footnote = false
+    linkify = true
+    strikethrough = true
+    table = true
+    taskList = true
+    typographer = true
+
+  [markup.goldmark.renderer]
+    unsafe = true
+
+  [markup.tableOfContents]
+    endLevel = 4
+    ordered = false
+    startLevel = 1
+
+[Author]
+  name = "Learning Repo Dev"
