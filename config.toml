@@ -1,4 +1,5 @@
 title = "Learning Repo Documentation"
+baseURL = "/"               # serve at http://localhost:1313/
 relativeurls = true
 uglyurls = true
 
@@ -8,7 +9,6 @@ pygmentsUseClasses = true
 pygmentCodeFences = true
 
 theme = "aec-documentation"
-
 disableSearch = true
 
 [module]
@@ -20,8 +20,9 @@ disableSearch = true
     source = 'design'
     target = 'content/design'
 
+  # ⚠ Match your actual folder casing exactly: workInstructions
   [[module.mounts]]
-    source = 'workinstructions'
+    source = 'workInstructions'
     target = 'content/workinstructions'
 
   [[module.mounts]]
@@ -29,7 +30,7 @@ disableSearch = true
     target = 'static/images'
 
   [[module.mounts]]
-    source = 'workinstructions/images'
+    source = 'workInstructions/images'
     target = 'static/images'
 
 [Params]
@@ -50,10 +51,8 @@ disableSearch = true
     table = true
     taskList = true
     typographer = true
-
   [markup.goldmark.renderer]
     unsafe = true
-
   [markup.tableOfContents]
     endLevel = 4
     ordered = false
