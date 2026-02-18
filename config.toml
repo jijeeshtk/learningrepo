@@ -3,26 +3,31 @@ relativeurls = true
 uglyurls = true
 
 DefaultContentLanguage = "en"
-theme = "aec-documentation"
 metaDataFormat = "yaml"
 pygmentsUseClasses = true
 pygmentCodeFences = true
 
 disableSearch = true
 
+# MOUNT CONTENT FOLDERS
 [module]
+
+  # Main content
   [[module.mounts]]
     source = 'main'
     target = 'content'
 
+  # Design docs
   [[module.mounts]]
     source = 'design'
     target = 'content/design'
 
+  # Work instructions
   [[module.mounts]]
     source = 'workInstructions'
     target = 'content/workinstructions'
 
+  # Static image mounts
   [[module.mounts]]
     source = 'design/images'
     target = 'static/images'
@@ -30,6 +35,13 @@ disableSearch = true
   [[module.mounts]]
     source = 'workInstructions/images'
     target = 'static/images'
+
+  # ✅ THEME IMPORT (VERY IMPORTANT)
+  [[module.imports]]
+    path = "aec-documentation"
+
+# (Optional; ignored in module mode, but keeping it doesn't hurt)
+theme = "aec-documentation"
 
 [Params]
   subtitle = "Learning Repo DEV Documentation"
