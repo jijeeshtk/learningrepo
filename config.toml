@@ -1,5 +1,5 @@
 title = "Learning Repo Documentation"
-baseURL = "/"               # serve at http://localhost:1313/
+baseURL = "/"
 relativeurls = true
 uglyurls = true
 
@@ -11,7 +11,15 @@ pygmentCodeFences = true
 theme = "aec-documentation"
 disableSearch = true
 
+#
+# ⭐ CRITICAL FIX ⭐
+# You are using module mounts → Hugo enters module mode →
+# theme MUST be imported under module.imports
+#
 [module]
+  [[module.imports]]
+    path = "aec-documentation"
+
   [[module.mounts]]
     source = 'main'
     target = 'content'
@@ -20,7 +28,7 @@ disableSearch = true
     source = 'design'
     target = 'content/design'
 
-  # ⚠ Match your actual folder casing exactly: workInstructions
+  # ⚠ Match your folder name exactly (workInstructions)
   [[module.mounts]]
     source = 'workInstructions'
     target = 'content/workinstructions'
@@ -51,8 +59,10 @@ disableSearch = true
     table = true
     taskList = true
     typographer = true
+
   [markup.goldmark.renderer]
     unsafe = true
+
   [markup.tableOfContents]
     endLevel = 4
     ordered = false
