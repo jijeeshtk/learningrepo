@@ -1,0 +1,454 @@
+layout:
+  pages:
+    - id: page_general
+      sections:
+        - id: section_112e1fe2
+          fields: []
+        - id: section_0d4573d2
+          fields:
+            - id: deploymentName
+              display: textField
+              state:
+                visible: true
+                read-only: false
+        - id: section_e5feb5b7
+          fields:
+            - id: project
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      deploymentName: null
+                    value: true
+        - id: section_786336bb
+          fields:
+            - id: VM_prefix
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      project: null
+                    value: true
+        - id: section_236f521b
+          fields:
+            - id: flavor
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      VM_prefix: null
+                    value: true
+        - id: section_Image
+          fields:
+            - id: Image
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      flavor: null
+                    value: true
+        - id: section_eb0545d5
+          fields:
+            - id: net_tag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      Image: null
+                    value: true
+        - id: section_2bf9614c
+          fields:
+            - id: zone_tag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      net_tag: null
+                    value: true
+        - id: section_53b32c0c
+          fields:
+            - id: cluster_tag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      zone_tag: null
+                    value: true
+        - id: section_7551696b
+          fields:
+            - id: storage_tag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      cluster_tag: null
+                    value: true
+        - id: section_02c6d645
+          fields:
+            - id: description
+              display: textArea
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      cluster_tag: null
+                    value: true
+        - id: section_74a713bc
+          fields:
+            - id: checkbox_286edb5e
+              display: checkbox
+              state:
+                read-only: true
+                visible:
+                  - notEmpty:
+                      cluster_tag: null
+                    value: true
+            - id: checkbox_c34a48fd
+              display: checkbox
+              state:
+                visible:
+                  - endsWith:
+                      cluster_tag: aa
+                    value: true
+                  - endsWith:
+                      cluster_tag: ap
+                    value: true
+                  - endsWith:
+                      cluster_tag: na
+                    value: false
+                read-only:
+                  - endsWith:
+                      cluster_tag: aa
+                    value: true
+                  - endsWith:
+                      cluster_tag: ap
+                    value: false
+      title: General
+      state: {}
+    - id: page_ded97104
+      sections:
+        - id: section_bc616b0e
+          fields:
+            - id: drEnabled-tag
+              display: dropDown
+              state:
+                visible: true
+                read-only: true
+        - id: section_33e0731b
+          fields:
+            - id: availabilityZone-tag
+              display: dropDown
+              state:
+                visible: true
+                read-only: false
+      title: Disaster recovery
+      state:
+        visible:
+          - equals:
+              checkbox_c34a48fd: true
+            value: true
+    - id: page_6daf5372
+      sections:
+        - id: section_cd8cd004
+          fields:
+            - id: remoteAccessUser
+              display: textField
+              state:
+                read-only: false
+                visible:
+                  - equals:
+                      checkbox_286edb5e: true
+                    value: true
+        - id: section_3509c89f
+          fields:
+            - id: remoteAccessCreds
+              display: passwordField
+              state:
+                read-only: false
+                visible:
+                  - equals:
+                      checkbox_286edb5e: true
+                    value: true
+        - id: section_c6763804
+          fields:
+            - id: remoteAccessType
+              display: dropDown
+              state:
+                visible: false
+                read-only: false
+      title: Local account
+      state:
+        visible:
+          - equals:
+              checkbox_286edb5e: true
+            value: true
+schema:
+  deploymentName:
+    label: '1. Deployment Name:'
+    description: Deployment Name
+    type:
+      dataType: string
+      isMultiple: false
+    constraints:
+      required: true
+      max-value: 80
+      match: 'null'
+      min-value: 5
+  project:
+    label: 2. Project
+    description: Project
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      id: projects
+      type: scriptAction
+    constraints:
+      required: true
+  VM_prefix:
+    label: '3. Virtual machine prefix name:'
+    description: VM prefix name
+    signpost: |-
+      Prefix name will be added into virtual machine name
+      e.g. dev-mcm1281736-141912795942
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: prod
+        label: prod
+      - value: dev
+        label: dev
+      - value: cat
+        label: cat
+    constraints:
+      required: true
+  flavor:
+    label: '4. Flavor:'
+    description: Flavor mappings
+    signpost: |-
+      Select flavor to create VM with proper size settings
+      e.g. vCPU: 1, Memory:  1Gb
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: XSmall
+        label: XSmall
+      - value: Small
+        label: Small
+      - value: Medium
+        label: Medium
+      - value: Large
+        label: Large
+      - value: XLarge
+        label: XLarge
+    constraints:
+      required: true
+  Image:
+    label: '5. Image template:'
+    description: OS Flavor Images
+    signpost: Select template from which new virtual machine will be provisioned
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: atos-win2016
+        label: atos-win2016
+      - value: atos-win2019
+        label: atos-win2019
+      - value: atos-sles15
+        label: atos-sles15
+      - value: atos-rhel7
+        label: atos-rhel7
+      - value: atos-rhel8
+        label: atos-rhel8
+    constraints:
+      required: true
+  net_tag:
+    label: '6. Network:'
+    description: Network profile
+    signpost: Select proper network for new virtual machine
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: web
+        label: web
+      - value: app
+        label: app
+      - value: db
+        label: db
+      - value: tooling
+        label: tooling
+    constraints:
+      required: true
+  zone_tag:
+    label: '7. Cloud zone:'
+    description: Cloud zone name
+    signpost: Select cloud zone on which deployment will be created
+    type:
+      dataType: string
+      isMultiple: false
+    default: ''
+    valueList:
+      - value: mec0901
+        label: mec0901
+    constraints: {}
+  cluster_tag:
+    label: 8. Cluster
+    description: Cluster tag
+    signpost: Select cluster on which new virtual machine will be provisioned
+    type:
+      dataType: string
+      isMultiple: false
+    default: ''
+    valueList:
+      - value: mec09-c01-cluster01-na
+        label: mec09-c01-cluster01-na
+      - value: mec09-c01-cluster01-aa
+        label: mec09-c01-cluster01-aa
+      - value: mec09-c01-cluster01-ap
+        label: mec09-c01-cluster01-ap
+    constraints:
+      required: true
+  storage_tag:
+    label: '9. Storage class:'
+    description: Storage profile
+    signpost: Select storage class on which new virtual machine will be provisioned
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: gold
+        label: gold
+    constraints:
+      required: true
+  description:
+    label: '10. Description:'
+    description: Description
+    signpost: |-
+      Provide custom description for new virtual machine deployment
+      (by default filled with requester name)
+    type:
+      dataType: string
+      isMultiple: false
+    default:
+      bind:
+        values:
+          - '`Requested by:`'
+          - _requestedBy
+        operator: concatenate
+    constraints:
+      max-value: 120
+      min-value: 0
+  checkbox_286edb5e:
+    label: 11. Create local account
+    signpost: >-
+      Select to create local administrator account after new virtual machine
+      provisioning
+    type:
+      dataType: boolean
+    default: true
+    constraints: {}
+  checkbox_c34a48fd:
+    label: 12. Enable disaster recovery
+    signpost: Select to enable disaster recovery for new provisioned virtual machine
+    type:
+      dataType: boolean
+    default:
+      - endsWith:
+          cluster_tag: aa
+        value: true
+      - endsWith:
+          cluster_tag: na
+        value: false
+    constraints: {}
+  drEnabled-tag:
+    label: '12.1 Dr Enabled:'
+    signpost: Select to enable DR functionality for new virtual machine
+    type:
+      dataType: string
+      isMultiple: false
+    default:
+      - equals:
+          checkbox_c34a48fd: true
+        value: 'yes'
+      - equals:
+          checkbox_c34a48fd: false
+        value: 'no'
+    valueList:
+      - value: 'no'
+        label: 'no'
+      - value: 'yes'
+        label: 'yes'
+    constraints: {}
+  availabilityZone-tag:
+    label: '12.2 Availability Zone:'
+    signpost: >-
+      Select availability zone to which new virtual machine will be assigned
+      after provisioning
+    type:
+      dataType: string
+      isMultiple: false
+    default: mec09
+    valueList:
+      - value: mec09
+        label: mec09
+  remoteAccessUser:
+    label: 11.1 Create local account(user name)
+    description: 'Provide user name of new local account (max.length:18,min.length:12)'
+    signpost: 'Provide user name of new local account (max.length:18,min.length:12)'
+    type:
+      dataType: string
+      isMultiple: false
+    constraints:
+      required: false
+      min-value: 12
+      max-value: 18
+      pattern:
+        value: '[a-z0-9A-Z@#$]+'
+        message: >-
+          Constraint Description: must be compliant with [a-z0-9A-Z@#$]+ regular
+          expression.
+  remoteAccessCreds:
+    label: 11.2 Create local account(password)
+    description: 'Provide password of new local account (max.length:18,min.length:12)'
+    signpost: 'Provide password of new local account (max.length:18,min.length:12)'
+    type:
+      dataType: string
+      isMultiple: false
+    constraints:
+      required: false
+      min-value: 12
+      max-value: 18
+      pattern:
+        value: '[a-z0-9A-Z@#$]+'
+        message: >-
+          Constraint Description: must be compliant with [a-z0-9A-Z@#$]+ regular
+          expression.
+      match: 'null'
+  remoteAccessType:
+    label: 11.3 Remote Access Type
+    type:
+      dataType: string
+      isMultiple: false
+    default: usernamePassword
+    valueList:
+      - value: generatedPublicPrivatekey
+        label: generatedPublicPrivatekey
+      - value: usernamePassword
+        label: usernamePassword
+    constraints:
+      max-value: 20
+      min-value: 8
+options:
+  externalValidations: []

@@ -1,0 +1,428 @@
+layout:
+  pages:
+    - id: page_general
+      sections:
+        - id: section_69e3a849
+          fields:
+            - id: deploymentName
+              display: textField
+              state:
+                visible: true
+                read-only: false
+        - id: section_86237e35
+          fields:
+            - id: project
+              display: dropDown
+              state:
+                visible: true
+                read-only: false
+        - id: section_3891bb63
+          fields:
+            - id: prefixStackVMs
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      deploymentName: null
+                    value: true
+        - id: section_Image
+          fields:
+            - id: Image
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      prefixStackVMs: null
+                    value: true
+        - id: section_flavor
+          fields:
+            - id: flavor
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      Image: null
+                    value: true
+        - id: section_zoneTag
+          fields:
+            - id: zoneTag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      flavor: null
+                    value: true
+        - id: section_clusterTag
+          fields:
+            - id: clusterTag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      zoneTag: null
+                    value: true
+        - id: section_networkTag
+          fields:
+            - id: networkTag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      clusterTag: null
+                    value: true
+        - id: section_storageTag
+          fields:
+            - id: storageTag
+              display: dropDown
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      networkTag: null
+                    value: true
+        - id: section_f5c82f01
+          fields:
+            - id: checkbox_91af2c16
+              display: checkbox
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      prefixStackVMs: null
+                    value: true
+        - id: section_c8f9936f
+          fields:
+            - id: text_0278d874
+              display: text
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      storageTag: null
+                    value: true
+        - id: section_5d8c9dfc
+          fields:
+            - id: text_4a093c64
+              display: textField
+              state:
+                read-only: true
+                visible:
+                  - notEmpty:
+                      storageTag: null
+                    value: true
+        - id: section_0ca0bb0e
+          fields:
+            - id: textField_9553d04e
+              display: textField
+              state:
+                read-only: true
+                visible:
+                  - notEmpty:
+                      checkbox_91af2c16: true
+                    value: true
+            - id: textField_a1869b08
+              display: textField
+              state:
+                read-only: true
+                visible:
+                  - notEmpty:
+                      checkbox_91af2c16: true
+                    value: true
+        - id: section_4ea2a55d
+          fields:
+            - id: description
+              display: textArea
+              state:
+                read-only: false
+                visible:
+                  - notEmpty:
+                      prefixStackVMs: null
+                    value: true
+      title: General
+      state: {}
+    - id: page_9a307ee9
+      sections:
+        - id: section_f156ee9a
+          fields:
+            - id: StackVmInstances
+              display: integerField
+              state:
+                read-only: false
+                visible:
+                  - equals:
+                      checkbox_91af2c16: false
+                    value: true
+        - id: section_4ca79de1
+          fields:
+            - id: StackVolumes
+              display: integerField
+              state:
+                read-only: false
+                visible:
+                  - equals:
+                      checkbox_91af2c16: false
+                    value: true
+        - id: section_eb768bb5
+          fields:
+            - id: StackVolumesSizes
+              display: integerField
+              state:
+                read-only: false
+                visible:
+                  - equals:
+                      checkbox_91af2c16: false
+                    value: true
+      title: Custom stack resources settings
+      state:
+        visible:
+          - equals:
+              checkbox_91af2c16: false
+            value: true
+schema:
+  deploymentName:
+    label: 1. Deployment Name
+    description: Deployment Name
+    type:
+      dataType: string
+      isMultiple: false
+    constraints:
+      required: true
+      max-value: 80
+  project:
+    label: 2. Project
+    description: Project
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      id: projects
+      type: scriptAction
+    constraints:
+      required: true
+  prefixStackVMs:
+    label: 3. Prefix name for virtual machine names
+    description: Select prefix to attach into VMs names
+    signpost: Select prefix to attach into VMs names
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: prod
+        label: prod
+      - value: app
+        label: app
+      - value: dev
+        label: dev
+      - value: web
+        label: web
+      - value: tooling
+        label: tooling
+      - value: test
+        label: test
+      - value: cat
+        label: cat
+      - value: '${env.projectName}'
+        label: '${env.projectName}'
+    constraints:
+      required: false
+  Image:
+    label: 4. Image template
+    description: Image template used for VMs under stack
+    signpost: Image template used for VMs under stack
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: atos-win2016
+        label: atos-win2016
+      - value: atos-win2019
+        label: atos-win2019
+      - value: atos-sles15
+        label: atos-sles15
+      - value: atos-rhel7
+        label: atos-rhel7
+    constraints:
+      required: true
+  flavor:
+    label: 5. Flavor
+    description: Flavor used for VMs under stack
+    signpost: Flavor used for VMs under stack
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: XSmall
+        label: XSmall
+      - value: Small
+        label: Small
+      - value: Medium
+        label: Medium
+      - value: Large
+        label: Large
+      - value: XLarge
+        label: XLarge
+    constraints:
+      required: true
+  zoneTag:
+    label: 6. Cloud zone
+    description: Assign proper cloudzone to use for new stack
+    signpost: Assign proper cloudzone to use for new stack
+    type:
+      dataType: string
+      isMultiple: false
+    default: ''
+    valueList:
+      - value: 'CloudZone:mec9401'
+        label: 'CloudZone:mec9401'
+  clusterTag:
+    label: 7. Cluster
+    description: Select proper cluster tag to provision stack VMs
+    signpost: Select proper cluster tag to provision stack VMs
+    type:
+      dataType: string
+      isMultiple: false
+    default: ''
+    valueList:
+      - value: 'ComputeCluster:mec94-c01-cluster01'
+        label: 'ComputeCluster:mec94-c01-cluster01'
+  networkTag:
+    label: 8. Network
+    description: Network profile
+    signpost: Network profile
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: 'CloudNetwork:web'
+        label: 'CloudNetwork:web'
+      - value: 'CloudNetwork:app'
+        label: 'CloudNetwork:app'
+      - value: 'CloudNetwork:db'
+        label: 'CloudNetwork:db'
+      - value: 'CloudNetwork:tooling'
+        label: 'CloudNetwork:tooling'
+    constraints:
+      required: true
+  storageTag:
+    label: 9. Storage class
+    description: Assign proper storage class for stack VMs
+    signpost: Assign proper storage class for stack VMs
+    type:
+      dataType: string
+      isMultiple: false
+    valueList:
+      - value: 'cloudstorage:cluster01-gold'
+        label: 'cloudstorage:cluster01-gold'
+    constraints:
+      required: true
+  checkbox_91af2c16:
+    label: 10. Use default stack resources settings
+    type:
+      dataType: boolean
+    default: true
+    constraints: {}
+  text_0278d874:
+    type:
+      dataType: string
+    default: 'Default stack resource settings:'
+    constraints: {}
+  text_4a093c64:
+    label: Number virtual machines to provision
+    signpost: >-
+      Amount of virtual machines to provision under stack (Max.5,Min.1,Default
+      2)
+    type:
+      dataType: string
+    default:
+      bind:
+        values:
+          - StackVmInstances
+        operator: concatenate
+    constraints: {}
+  textField_9553d04e:
+    label: Amount of volumes created and attached to virtual machines
+    signpost: >-
+      Amount of volumes attached to each virtual machine under stack
+      (Max.5,Min.1,Default 2)
+    type:
+      dataType: string
+    default:
+      bind:
+        values:
+          - StackVolumes
+        operator: concatenate
+    placeholder: ''
+    constraints: {}
+  textField_a1869b08:
+    label: Size (Gb) of volumes attached to virtual machines
+    signpost: 'Volume size in Gb (max.100Gb, min.1Gb,default 10Gb)'
+    type:
+      dataType: string
+    default:
+      bind:
+        values:
+          - StackVolumesSizes
+        operator: concatenate
+    placeholder: ''
+    constraints: {}
+  description:
+    label: 13. Description
+    description: Description
+    type:
+      dataType: string
+      isMultiple: false
+    constraints:
+      max-value: 256
+  StackVmInstances:
+    label: 10. Number virtual machines to provision
+    description: 'Provide amount of VMs to be created under stack (default:1, maximum:5)'
+    signpost: 'Provide amount of VMs to be created under stack (default:1, maximum:5)'
+    type:
+      dataType: integer
+      isMultiple: false
+    default: 2
+    constraints:
+      min-value: 1
+      max-value: 5
+  StackVolumes:
+    label: 11. Amount of volumes created and attached to virtual machines
+    description: >-
+      Provide amount of volumes to be created under stack VMs (default:1,
+      maximum:5)
+    signpost: >-
+      Provide amount of volumes to be created under stack VMs (default:1,
+      maximum:5)
+    type:
+      dataType: integer
+      isMultiple: false
+    default:
+      bind:
+        values:
+          - text_4a093c64
+        operator: add
+    constraints:
+      min-value: 1
+      max-value: 5
+  StackVolumesSizes:
+    label: 12. Size of volumes attached to virtual machines
+    description: >-
+      Provide size in Gb for volumes created and attched to stack virtual
+      machines (default size:1Gb, maximum size:100Gb)
+    signpost: >-
+      Provide size in Gb for volumes created and attched to stack virtual
+      machines (default size:10Gb, maximum size:100Gb)
+    type:
+      dataType: integer
+      isMultiple: false
+    default: 10
+    constraints:
+      min-value: 1
+      max-value: 100
+options:
+  externalValidations: []

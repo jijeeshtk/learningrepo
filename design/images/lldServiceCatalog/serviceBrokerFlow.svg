@@ -1,0 +1,299 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" xml:space="preserve" color-interpolation-filters="sRGB" class="st32" viewBox="-6.2 -3.18 1104.56 1044">
+	<v:documentProperties v:langID="1033" v:metric="true" v:viewMarkup="false">
+		<v:userDefs>
+			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+		</v:userDefs>
+	</v:documentProperties>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:none;stroke:#78be20;stroke-dasharray:7,5;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st2 {fill:none;stroke:#ec7700;stroke-linecap:round;stroke-linejoin:round;stroke-width:2.5}
+		.st3 {fill:#000000;font-family:Calibri;font-size:1.5em}
+		.st4 {fill:#ffffff;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st5 {fill:#000000;stroke:none;stroke-linecap:butt;stroke-width:0.75}
+		.st6 {fill:#ec7700;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st7 {fill:#ffffff;font-family:Calibri;font-size:1.16666em}
+		.st8 {fill:none;stroke:#ec7700;stroke-dasharray:7,5;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st9 {font-size:1em}
+		.st10 {fill:#dbeef3;stroke:#1d428a;stroke-dasharray:7,5;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st11 {fill:#000000;font-family:Calibri;font-size:1.99999em}
+		.st12 {fill:#7f35b2;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st13 {fill:#ffffff;font-family:Calibri;font-size:1.33333em}
+		.st14 {fill:none;stroke:#7f35b2;stroke-dasharray:7,5;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st15 {fill:#ffffff;stroke:#0091da;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st16 {fill:#0091da;font-family:Calibri;font-size:1.5em}
+		.st17 {fill:#0091da;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st18 {fill:#ffffff;font-family:Calibri;font-size:1.5em}
+		.st19 {fill:#ffffff;stroke:#1d428a;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st20 {fill:none;stroke:#1d428a;stroke-dasharray:7,5;stroke-linecap:round;stroke-linejoin:round;stroke-width:1}
+		.st21 {marker-end:url(#mrkr5-89);stroke:#000000;stroke-dasharray:8.75,6.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.25}
+		.st22 {fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:0.3315649867374}
+		.st23 {marker-start:url(#mrkr5-98);stroke:#000000;stroke-dasharray:8.75,6.25;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.25}
+		.st24 {marker-end:url(#mrkr5-104);stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}
+		.st25 {fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:0.44247787610619}
+		.st26 {fill:#ffffff;stroke:none;stroke-linecap:butt;stroke-width:7.2}
+		.st27 {fill:#000000;font-family:Calibri;font-size:1.16666em}
+		.st28 {stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}
+		.st29 {fill:#ea700d;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st30 {fill:none;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st31 {fill:#7e649e;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
+		.st32 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<defs id="Markers">
+		<g id="lend5">
+			<path d="M 2 1 L 0 0 L 1.98117 -0.993387 C 1.67173 -0.364515 1.67301 0.372641 1.98465 1.00043 " style="stroke:none"/>
+		</g>
+		<marker id="mrkr5-89" class="st22" v:arrowType="5" v:arrowSize="2" v:setback="5.278" refX="-5.278" orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend5" transform="scale(-3.016,-3.016) "/>
+		</marker>
+		<marker id="mrkr5-98" class="st22" v:arrowType="5" v:arrowSize="2" v:setback="4.99" refX="4.99" orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend5" transform="scale(3.016) "/>
+		</marker>
+		<marker id="mrkr5-104" class="st25" v:arrowType="5" v:arrowSize="2" v:setback="3.955" refX="-3.955" orient="auto" markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend5" transform="scale(-2.26,-2.26) "/>
+		</marker>
+	</defs>
+	<g v:mID="7" v:index="1" v:groupContext="foregroundPage">
+		<title>Service Broker Communication flow</title>
+		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394" v:shadowOffsetY="-8.50394"/>
+		<v:layer v:name="Connector" v:index="0"/>
+		<g id="shape4-1" v:mID="4" v:groupContext="shape" transform="translate(39.1181,-607.465)">
+			<title>Leaf_Outline</title>
+			<path d="M0 641.48 L0 1647.78 L1058.74 1647.78 L1058.74 641.48 L0 641.48 L0 641.48 Z" class="st1"/>
+		</g>
+		<g id="shape95-3" v:mID="95" v:groupContext="shape" transform="translate(77.3858,-850.323)">
+			<title>Indigo_Outline</title>
+			<desc>Service Broker</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197" v:verticalAlign="0"/>
+			<v:textRect cx="503.15" cy="1414.88" width="1006.3" height="465.803"/>
+			<path d="M0 1181.98 L0 1647.78 L1006.3 1647.78 L1006.3 1181.98 L0 1181.98 L0 1181.98 Z" class="st2"/>
+			<text x="73.18" y="1223.78" class="st3" v:langID="1033"><v:paragraph/><v:tabList/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:lf/>Service Broker</text>		</g>
+		<g id="shape1236-6" v:mID="1236" v:groupContext="shape" transform="translate(869.389,-1249.1)">
+			<title>Ocean.1236</title>
+			<path d="M0 1601.62 L0 1647.78 L141.73 1647.78 L141.73 1601.62 L0 1601.62 L0 1601.62 Z" class="st4"/>
+		</g>
+		<g id="group1238-8" transform="translate(828.567,-1216.91)" v:mID="1238" v:groupContext="group">
+			<title>File.1238</title>
+			<g id="shape1239-9" v:mID="1239" v:groupContext="shape">
+				<title>Sheet.1239</title>
+				<path d="M2.99 1639.71 L25.92 1639.71 L25.92 1638.12 L2.99 1638.12 L2.99 1639.71 ZM2.99 1637.25 L25.92 1637.25 L25.92         1635.67 L2.99 1635.67 L2.99 1637.25 ZM2.99 1634.8 L25.92 1634.8 L25.92 1633.22 L2.99 1633.22 L2.99 1634.8         ZM2.99 1632.35 L25.92 1632.35 L25.92 1630.77 L2.99 1630.77 L2.99 1632.35 ZM2.99 1629.9 L25.92 1629.9         L25.92 1628.32 L2.99 1628.32 L2.99 1629.9 ZM2.99 1627.45 L25.92 1627.45 L25.92 1625.86 L2.99 1625.86         L2.99 1627.45 ZM12.29 1618.94 L2.82 1618.94 L2.82 1620.53 L12.29 1620.53 L12.29 1618.94 ZM12.29 1616.93         L2.82 1616.93 L2.82 1618.51 L12.29 1618.51 L12.29 1616.93 ZM18.28 1643.74 L25.92 1643.74 L25.92 1642.16         L18.28 1642.16 L18.28 1643.74 ZM27.75 1620.1 L19.94 1613.9 L19.11 1613.18 L0 1613.18 L0 1647.78 L28.58         1647.78 L28.58 1620.53 L27.75 1620.1 ZM19.94 1615.92 L25.25 1619.95 L19.94 1619.95 L19.94 1615.92 ZM26.91         1646.48 L1.66 1646.48 L1.66 1614.76 L18.28 1614.76 L18.28 1621.4 L26.91 1621.4 L26.91 1646.48 Z" class="st5"/>
+			</g>
+		</g>
+		<g id="group1240-11" transform="translate(874.4,-1216.91)" v:mID="1240" v:groupContext="group">
+			<title>File.1240</title>
+			<g id="shape1241-12" v:mID="1241" v:groupContext="shape">
+				<title>Sheet.1241</title>
+				<path d="M2.99 1639.71 L25.92 1639.71 L25.92 1638.12 L2.99 1638.12 L2.99 1639.71 ZM2.99 1637.25 L25.92 1637.25 L25.92         1635.67 L2.99 1635.67 L2.99 1637.25 ZM2.99 1634.8 L25.92 1634.8 L25.92 1633.22 L2.99 1633.22 L2.99 1634.8         ZM2.99 1632.35 L25.92 1632.35 L25.92 1630.77 L2.99 1630.77 L2.99 1632.35 ZM2.99 1629.9 L25.92 1629.9         L25.92 1628.32 L2.99 1628.32 L2.99 1629.9 ZM2.99 1627.45 L25.92 1627.45 L25.92 1625.86 L2.99 1625.86         L2.99 1627.45 ZM12.29 1618.94 L2.82 1618.94 L2.82 1620.53 L12.29 1620.53 L12.29 1618.94 ZM12.29 1616.93         L2.82 1616.93 L2.82 1618.51 L12.29 1618.51 L12.29 1616.93 ZM18.28 1643.74 L25.92 1643.74 L25.92 1642.16         L18.28 1642.16 L18.28 1643.74 ZM27.75 1620.1 L19.94 1613.9 L19.11 1613.18 L0 1613.18 L0 1647.78 L28.58         1647.78 L28.58 1620.53 L27.75 1620.1 ZM19.94 1615.92 L25.25 1619.95 L19.94 1619.95 L19.94 1615.92 ZM26.91         1646.48 L1.66 1646.48 L1.66 1614.76 L18.28 1614.76 L18.28 1621.4 L26.91 1621.4 L26.91 1646.48 Z" class="st5"/>
+			</g>
+		</g>
+		<g id="group1242-14" transform="translate(920.232,-1216.91)" v:mID="1242" v:groupContext="group">
+			<title>File.1242</title>
+			<g id="shape1243-15" v:mID="1243" v:groupContext="shape">
+				<title>Sheet.1243</title>
+				<path d="M2.99 1639.71 L25.92 1639.71 L25.92 1638.12 L2.99 1638.12 L2.99 1639.71 ZM2.99 1637.25 L25.92 1637.25 L25.92         1635.67 L2.99 1635.67 L2.99 1637.25 ZM2.99 1634.8 L25.92 1634.8 L25.92 1633.22 L2.99 1633.22 L2.99 1634.8         ZM2.99 1632.35 L25.92 1632.35 L25.92 1630.77 L2.99 1630.77 L2.99 1632.35 ZM2.99 1629.9 L25.92 1629.9         L25.92 1628.32 L2.99 1628.32 L2.99 1629.9 ZM2.99 1627.45 L25.92 1627.45 L25.92 1625.86 L2.99 1625.86         L2.99 1627.45 ZM12.29 1618.94 L2.82 1618.94 L2.82 1620.53 L12.29 1620.53 L12.29 1618.94 ZM12.29 1616.93         L2.82 1616.93 L2.82 1618.51 L12.29 1618.51 L12.29 1616.93 ZM18.28 1643.74 L25.92 1643.74 L25.92 1642.16         L18.28 1642.16 L18.28 1643.74 ZM27.75 1620.1 L19.94 1613.9 L19.11 1613.18 L0 1613.18 L0 1647.78 L28.58         1647.78 L28.58 1620.53 L27.75 1620.1 ZM19.94 1615.92 L25.25 1619.95 L19.94 1619.95 L19.94 1615.92 ZM26.91         1646.48 L1.66 1646.48 L1.66 1614.76 L18.28 1614.76 L18.28 1621.4 L26.91 1621.4 L26.91 1646.48 Z" class="st5"/>
+			</g>
+		</g>
+		<g id="shape1244-17" v:mID="1244" v:groupContext="shape" transform="translate(757.701,-1160.22)">
+			<title>Tangerine_Outline.1244</title>
+			<desc>Catalog</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197" v:verticalAlign="0"/>
+			<v:textRect cx="148.819" cy="1575.94" width="297.64" height="143.688"/>
+			<path d="M0 1504.09 L0 1647.78 L297.64 1647.78 L297.64 1504.09 L0 1504.09 L0 1504.09 Z" class="st2"/>
+			<text x="4" y="1524.29" class="st3" v:langID="1033"><v:paragraph/><v:tabList/>Catalog</text>		</g>
+		<g id="shape1245-20" v:mID="1245" v:groupContext="shape" transform="translate(835.654,-1178.67)">
+			<title>Tangerine.1245</title>
+			<desc>Catalog Items</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="77.9528" cy="1637.88" width="155.91" height="19.8"/>
+			<path d="M0 1627.98 L0 1647.78 L155.91 1647.78 L155.91 1627.98 L0 1627.98 L0 1627.98 Z" class="st6"/>
+			<text x="39.07" y="1643.28" class="st7" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Catalog Items</text>		</g>
+		<g id="shape1246-23" v:mID="1246" v:groupContext="shape" transform="translate(786.047,-1173.09)">
+			<title>Tangerine_Outline.1246</title>
+			<path d="M0 1552.93 L0 1647.78 L240.94 1647.78 L240.94 1552.93 L0 1552.93 L0 1552.93 Z" class="st8"/>
+		</g>
+		<g id="group1247-25" transform="translate(966.065,-1216.91)" v:mID="1247" v:groupContext="group">
+			<title>File.1247</title>
+			<g id="shape1248-26" v:mID="1248" v:groupContext="shape">
+				<title>Sheet.1248</title>
+				<path d="M2.99 1639.71 L25.92 1639.71 L25.92 1638.12 L2.99 1638.12 L2.99 1639.71 ZM2.99 1637.25 L25.92 1637.25 L25.92         1635.67 L2.99 1635.67 L2.99 1637.25 ZM2.99 1634.8 L25.92 1634.8 L25.92 1633.22 L2.99 1633.22 L2.99 1634.8         ZM2.99 1632.35 L25.92 1632.35 L25.92 1630.77 L2.99 1630.77 L2.99 1632.35 ZM2.99 1629.9 L25.92 1629.9         L25.92 1628.32 L2.99 1628.32 L2.99 1629.9 ZM2.99 1627.45 L25.92 1627.45 L25.92 1625.86 L2.99 1625.86         L2.99 1627.45 ZM12.29 1618.94 L2.82 1618.94 L2.82 1620.53 L12.29 1620.53 L12.29 1618.94 ZM12.29 1616.93         L2.82 1616.93 L2.82 1618.51 L12.29 1618.51 L12.29 1616.93 ZM18.28 1643.74 L25.92 1643.74 L25.92 1642.16         L18.28 1642.16 L18.28 1643.74 ZM27.75 1620.1 L19.94 1613.9 L19.11 1613.18 L0 1613.18 L0 1647.78 L28.58         1647.78 L28.58 1620.53 L27.75 1620.1 ZM19.94 1615.92 L25.25 1619.95 L19.94 1619.95 L19.94 1615.92 ZM26.91         1646.48 L1.66 1646.48 L1.66 1614.76 L18.28 1614.76 L18.28 1621.4 L26.91 1621.4 L26.91 1646.48 Z" class="st5"/>
+			</g>
+		</g>
+		<g id="shape1249-28" v:mID="1249" v:groupContext="shape" transform="translate(757.701,-862.583)">
+			<title>Tangerine_Outline.1249</title>
+			<desc>Deployments Monitor and manage deployments</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197" v:verticalAlign="0"/>
+			<v:textRect cx="148.819" cy="1506.05" width="297.64" height="283.465"/>
+			<path d="M0 1364.31 L0 1647.78 L297.64 1647.78 L297.64 1364.31 L0 1364.31 L0 1364.31 Z" class="st2"/>
+			<text x="4" y="1384.51" class="st3" v:langID="1033"><v:paragraph/><v:tabList/>Deployments<v:newlineChar/><tspan x="4" dy="1.2em" class="st9">Monitor and manage deployments</tspan></text>		</g>
+		<g id="group1250-32" transform="translate(826.87,-1023.75)" v:mID="1250" v:groupContext="group">
+			<title>Blue Print</title>
+			<g id="shape1251-33" v:mID="1251" v:groupContext="shape">
+				<title>Sheet.1251</title>
+				<path d="M4.71 1601.62 L4.71 1607.16 L0 1607.16 L0 1647.78 L38.23 1647.78 L38.23 1642.24 L44.11 1642.24 L44.11 1601.62         L4.71 1601.62 ZM36.76 1646.24 L1.47 1646.24 L1.47 1608.69 L30.14 1608.69 L30.14 1615.62 L36.76 1615.62         L36.76 1646.24 ZM31.61 1614.08 L31.61 1609.62 L35.58 1614.08 L31.61 1614.08 ZM42.64 1640.7 L38.23 1640.7         L38.23 1614.7 L31.47 1607.16 L31.32 1607 L6.18 1607 L6.18 1603 L42.64 1603 L42.64 1640.7 ZM28.97 1610.85         L2.94 1610.85 L2.94 1644.55 L35.44 1644.55 L35.44 1617.47 L34.26 1617.47 L34.26 1617.31 L28.97 1617.31         L28.97 1610.85 ZM9.41 1636.55 L4.41 1636.55 L4.41 1631.62 L9.41 1631.62 L9.41 1636.55 ZM9.41 1630.24         L4.41 1630.24 L4.41 1625.31 L9.41 1625.31 L9.41 1630.24 ZM9.41 1623.77 L4.41 1623.77 L4.41 1618.85 L9.41         1618.85 L9.41 1623.77 ZM9.41 1617.31 L4.41 1617.31 L4.41 1612.39 L9.41 1612.39 L9.41 1617.31 ZM15.44         1636.55 L10.88 1636.55 L10.88 1631.62 L15.44 1631.62 L15.44 1636.55 ZM15.44 1630.24 L10.88 1630.24 L10.88         1625.31 L15.44 1625.31 L15.44 1630.24 ZM15.44 1623.77 L10.88 1623.77 L10.88 1621.93 L14.12 1621.93 L14.12         1618.85 L15.44 1618.85 L15.44 1623.77 ZM15.44 1617.31 L14.12 1617.31 L14.12 1614.23 L10.88 1614.23 L10.88         1612.39 L15.44 1612.39 L15.44 1617.31 ZM21.47 1643.01 L16.91 1643.01 L16.91 1638.09 L21.47 1638.09 L21.47         1643.01 ZM21.47 1636.55 L16.91 1636.55 L16.91 1634.08 L20.29 1634.08 L20.29 1631.62 L21.47 1631.62 L21.47         1636.55 ZM21.47 1630.24 L20.29 1630.24 L20.29 1626.39 L16.91 1626.39 L16.91 1625.31 L21.47 1625.31 L21.47         1630.24 ZM21.47 1623.77 L16.91 1623.77 L16.91 1618.85 L21.47 1618.85 L21.47 1623.77 ZM21.47 1617.31         L16.91 1617.31 L16.91 1612.39 L21.47 1612.39 L21.47 1617.31 ZM27.5 1643.01 L22.94 1643.01 L22.94 1638.09         L27.5 1638.09 L27.5 1643.01 ZM27.5 1636.55 L22.94 1636.55 L22.94 1631.62 L27.5 1631.62 L27.5 1636.55         ZM27.5 1630.24 L22.94 1630.24 L22.94 1625.31 L27.5 1625.31 L27.5 1630.24 ZM27.5 1623.77 L22.94 1623.77         L22.94 1621.93 L26.32 1621.93 L26.32 1618.85 L27.5 1618.85 L27.5 1623.77 ZM27.5 1617.31 L26.32 1617.31         L26.32 1614.23 L22.94 1614.23 L22.94 1612.39 L27.5 1612.39 L27.5 1617.31 ZM33.97 1643.01 L28.97 1643.01         L28.97 1638.09 L33.97 1638.09 L33.97 1643.01 ZM33.97 1636.55 L28.97 1636.55 L28.97 1634.08 L32.5 1634.08         L32.5 1631.62 L33.97 1631.62 L33.97 1636.55 ZM33.97 1630.24 L32.5 1630.24 L32.5 1626.39 L28.97 1626.39         L28.97 1625.31 L33.97 1625.31 L33.97 1630.24 ZM33.97 1618.85 L33.97 1623.77 L28.97 1623.77 L28.97 1618.85         L33.97 1618.85 Z" class="st5"/>
+			</g>
+		</g>
+		<g id="group1252-35" transform="translate(891.55,-1023.75)" v:mID="1252" v:groupContext="group">
+			<title>Blue Print.1252</title>
+			<g id="shape1253-36" v:mID="1253" v:groupContext="shape">
+				<title>Sheet.1253</title>
+				<path d="M4.71 1601.62 L4.71 1607.16 L0 1607.16 L0 1647.78 L38.23 1647.78 L38.23 1642.24 L44.11 1642.24 L44.11 1601.62         L4.71 1601.62 ZM36.76 1646.24 L1.47 1646.24 L1.47 1608.69 L30.14 1608.69 L30.14 1615.62 L36.76 1615.62         L36.76 1646.24 ZM31.61 1614.08 L31.61 1609.62 L35.58 1614.08 L31.61 1614.08 ZM42.64 1640.7 L38.23 1640.7         L38.23 1614.7 L31.47 1607.16 L31.32 1607 L6.18 1607 L6.18 1603 L42.64 1603 L42.64 1640.7 ZM28.97 1610.85         L2.94 1610.85 L2.94 1644.55 L35.44 1644.55 L35.44 1617.47 L34.26 1617.47 L34.26 1617.31 L28.97 1617.31         L28.97 1610.85 ZM9.41 1636.55 L4.41 1636.55 L4.41 1631.62 L9.41 1631.62 L9.41 1636.55 ZM9.41 1630.24         L4.41 1630.24 L4.41 1625.31 L9.41 1625.31 L9.41 1630.24 ZM9.41 1623.77 L4.41 1623.77 L4.41 1618.85 L9.41         1618.85 L9.41 1623.77 ZM9.41 1617.31 L4.41 1617.31 L4.41 1612.39 L9.41 1612.39 L9.41 1617.31 ZM15.44         1636.55 L10.88 1636.55 L10.88 1631.62 L15.44 1631.62 L15.44 1636.55 ZM15.44 1630.24 L10.88 1630.24 L10.88         1625.31 L15.44 1625.31 L15.44 1630.24 ZM15.44 1623.77 L10.88 1623.77 L10.88 1621.93 L14.12 1621.93 L14.12         1618.85 L15.44 1618.85 L15.44 1623.77 ZM15.44 1617.31 L14.12 1617.31 L14.12 1614.23 L10.88 1614.23 L10.88         1612.39 L15.44 1612.39 L15.44 1617.31 ZM21.47 1643.01 L16.91 1643.01 L16.91 1638.09 L21.47 1638.09 L21.47         1643.01 ZM21.47 1636.55 L16.91 1636.55 L16.91 1634.08 L20.29 1634.08 L20.29 1631.62 L21.47 1631.62 L21.47         1636.55 ZM21.47 1630.24 L20.29 1630.24 L20.29 1626.39 L16.91 1626.39 L16.91 1625.31 L21.47 1625.31 L21.47         1630.24 ZM21.47 1623.77 L16.91 1623.77 L16.91 1618.85 L21.47 1618.85 L21.47 1623.77 ZM21.47 1617.31         L16.91 1617.31 L16.91 1612.39 L21.47 1612.39 L21.47 1617.31 ZM27.5 1643.01 L22.94 1643.01 L22.94 1638.09         L27.5 1638.09 L27.5 1643.01 ZM27.5 1636.55 L22.94 1636.55 L22.94 1631.62 L27.5 1631.62 L27.5 1636.55         ZM27.5 1630.24 L22.94 1630.24 L22.94 1625.31 L27.5 1625.31 L27.5 1630.24 ZM27.5 1623.77 L22.94 1623.77         L22.94 1621.93 L26.32 1621.93 L26.32 1618.85 L27.5 1618.85 L27.5 1623.77 ZM27.5 1617.31 L26.32 1617.31         L26.32 1614.23 L22.94 1614.23 L22.94 1612.39 L27.5 1612.39 L27.5 1617.31 ZM33.97 1643.01 L28.97 1643.01         L28.97 1638.09 L33.97 1638.09 L33.97 1643.01 ZM33.97 1636.55 L28.97 1636.55 L28.97 1634.08 L32.5 1634.08         L32.5 1631.62 L33.97 1631.62 L33.97 1636.55 ZM33.97 1630.24 L32.5 1630.24 L32.5 1626.39 L28.97 1626.39         L28.97 1625.31 L33.97 1625.31 L33.97 1630.24 ZM33.97 1618.85 L33.97 1623.77 L28.97 1623.77 L28.97 1618.85         L33.97 1618.85 Z" class="st5"/>
+			</g>
+		</g>
+		<g id="group1254-38" transform="translate(956.23,-1023.75)" v:mID="1254" v:groupContext="group">
+			<title>Blue Print.1254</title>
+			<g id="shape1255-39" v:mID="1255" v:groupContext="shape">
+				<title>Sheet.1255</title>
+				<path d="M4.71 1601.62 L4.71 1607.16 L0 1607.16 L0 1647.78 L38.23 1647.78 L38.23 1642.24 L44.11 1642.24 L44.11 1601.62         L4.71 1601.62 ZM36.76 1646.24 L1.47 1646.24 L1.47 1608.69 L30.14 1608.69 L30.14 1615.62 L36.76 1615.62         L36.76 1646.24 ZM31.61 1614.08 L31.61 1609.62 L35.58 1614.08 L31.61 1614.08 ZM42.64 1640.7 L38.23 1640.7         L38.23 1614.7 L31.47 1607.16 L31.32 1607 L6.18 1607 L6.18 1603 L42.64 1603 L42.64 1640.7 ZM28.97 1610.85         L2.94 1610.85 L2.94 1644.55 L35.44 1644.55 L35.44 1617.47 L34.26 1617.47 L34.26 1617.31 L28.97 1617.31         L28.97 1610.85 ZM9.41 1636.55 L4.41 1636.55 L4.41 1631.62 L9.41 1631.62 L9.41 1636.55 ZM9.41 1630.24         L4.41 1630.24 L4.41 1625.31 L9.41 1625.31 L9.41 1630.24 ZM9.41 1623.77 L4.41 1623.77 L4.41 1618.85 L9.41         1618.85 L9.41 1623.77 ZM9.41 1617.31 L4.41 1617.31 L4.41 1612.39 L9.41 1612.39 L9.41 1617.31 ZM15.44         1636.55 L10.88 1636.55 L10.88 1631.62 L15.44 1631.62 L15.44 1636.55 ZM15.44 1630.24 L10.88 1630.24 L10.88         1625.31 L15.44 1625.31 L15.44 1630.24 ZM15.44 1623.77 L10.88 1623.77 L10.88 1621.93 L14.12 1621.93 L14.12         1618.85 L15.44 1618.85 L15.44 1623.77 ZM15.44 1617.31 L14.12 1617.31 L14.12 1614.23 L10.88 1614.23 L10.88         1612.39 L15.44 1612.39 L15.44 1617.31 ZM21.47 1643.01 L16.91 1643.01 L16.91 1638.09 L21.47 1638.09 L21.47         1643.01 ZM21.47 1636.55 L16.91 1636.55 L16.91 1634.08 L20.29 1634.08 L20.29 1631.62 L21.47 1631.62 L21.47         1636.55 ZM21.47 1630.24 L20.29 1630.24 L20.29 1626.39 L16.91 1626.39 L16.91 1625.31 L21.47 1625.31 L21.47         1630.24 ZM21.47 1623.77 L16.91 1623.77 L16.91 1618.85 L21.47 1618.85 L21.47 1623.77 ZM21.47 1617.31         L16.91 1617.31 L16.91 1612.39 L21.47 1612.39 L21.47 1617.31 ZM27.5 1643.01 L22.94 1643.01 L22.94 1638.09         L27.5 1638.09 L27.5 1643.01 ZM27.5 1636.55 L22.94 1636.55 L22.94 1631.62 L27.5 1631.62 L27.5 1636.55         ZM27.5 1630.24 L22.94 1630.24 L22.94 1625.31 L27.5 1625.31 L27.5 1630.24 ZM27.5 1623.77 L22.94 1623.77         L22.94 1621.93 L26.32 1621.93 L26.32 1618.85 L27.5 1618.85 L27.5 1623.77 ZM27.5 1617.31 L26.32 1617.31         L26.32 1614.23 L22.94 1614.23 L22.94 1612.39 L27.5 1612.39 L27.5 1617.31 ZM33.97 1643.01 L28.97 1643.01         L28.97 1638.09 L33.97 1638.09 L33.97 1643.01 ZM33.97 1636.55 L28.97 1636.55 L28.97 1634.08 L32.5 1634.08         L32.5 1631.62 L33.97 1631.62 L33.97 1636.55 ZM33.97 1630.24 L32.5 1630.24 L32.5 1626.39 L28.97 1626.39         L28.97 1625.31 L33.97 1625.31 L33.97 1630.24 ZM33.97 1618.85 L33.97 1623.77 L28.97 1623.77 L28.97 1618.85         L33.97 1618.85 Z" class="st5"/>
+			</g>
+		</g>
+		<g id="shape1256-41" v:mID="1256" v:groupContext="shape" transform="translate(786.047,-950.57)">
+			<title>Tangerine_Outline.1256</title>
+			<path d="M0 1504.09 L0 1647.78 L240.94 1647.78 L240.94 1504.09 L0 1504.09 L0 1504.09 Z" class="st8"/>
+		</g>
+		<g id="shape1257-43" v:mID="1257" v:groupContext="shape" transform="translate(828.567,-973.356)">
+			<title>Tangerine.1257</title>
+			<desc>Catalog item deployment</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="77.9528" cy="1630.48" width="155.91" height="34.6022"/>
+			<path d="M0 1613.18 L0 1647.78 L155.91 1647.78 L155.91 1613.18 L0 1613.18 L0 1613.18 Z" class="st6"/>
+			<text x="5.98" y="1635.88" class="st7" v:langID="1045"><v:paragraph v:horizAlign="1"/><v:tabList/>C<tspan class="st9" v:langID="1033">atalog item deployment</tspan></text>		</g>
+		<g id="shape1262-47" v:mID="1262" v:groupContext="shape" transform="translate(254.551,-1338.41)">
+			<title>Indigo_Outline.1262</title>
+			<desc>Content Sources</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197" v:verticalAlign="0"/>
+			<v:textRect cx="343.701" cy="1548.57" width="687.41" height="198.425"/>
+			<path d="M0 1449.35 L0 1647.78 L687.4 1647.78 L687.4 1449.35 L0 1449.35 L0 1449.35 Z" class="st10"/>
+			<text x="263.57" y="1474.95" class="st11" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Content Sources</text>		</g>
+		<g id="shape1263-50" v:mID="1263" v:groupContext="shape" transform="translate(795.087,-673.953)">
+			<title>Tangerine.105</title>
+			<desc>Cloud Zone</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="76" cy="1620.36" width="152.01" height="54.8295"/>
+			<path d="M0 1592.95 L0 1647.78 L152 1647.78 L152 1592.95 L0 1592.95 L0 1592.95 Z" class="st12"/>
+			<text x="39.32" y="1625.17" class="st13" v:langID="1045"><v:paragraph v:horizAlign="1"/><v:tabList/>Cloud<tspan class="st9" v:langID="1033"> </tspan><tspan class="st9" v:langID="1033">Zone</tspan></text>		</g>
+		<g id="shape1267-55" v:mID="1267" v:groupContext="shape" transform="translate(757.701,-658.488)">
+			<title>Plum_Outline.1267</title>
+			<path d="M0 1553.52 L0 1647.78 L226.77 1647.78 L226.77 1553.52 L0 1553.52 L0 1553.52 Z" class="st14"/>
+		</g>
+		<g id="shape1269-57" v:mID="1269" v:groupContext="shape" transform="translate(278.043,-1370.45)">
+			<title>Ocean_Outline.1269</title>
+			<desc>Assembler</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197" v:verticalAlign="0"/>
+			<v:textRect cx="204.396" cy="1592.93" width="408.8" height="109.69"/>
+			<path d="M0 1538.09 L0 1647.78 L408.79 1647.78 L408.79 1538.09 L0 1538.09 L0 1538.09 Z" class="st15"/>
+			<text x="32.49" y="1563.09" class="st16" v:langID="1033"><v:paragraph/><v:tabList/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:newlineChar/>Assembl<tspan class="st9" v:langID="1045">er</tspan></text>		</g>
+		<g id="shape1270-61" v:mID="1270" v:groupContext="shape" transform="translate(557.15,-1379.53)">
+			<title>Ocean.1270</title>
+			<desc>Released Assembler Blueprint Templates</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="58.8189" cy="1600.3" width="117.64" height="94.9569"/>
+			<path d="M0 1552.82 L0 1647.78 L117.64 1647.78 L117.64 1552.82 L0 1552.82 L0 1552.82 Z" class="st17"/>
+			<text x="25.87" y="1573.3" class="st18" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Released <tspan x="20.49" dy="1.2em" class="st9">Assembl</tspan><tspan class="st9" v:langID="1045">er</tspan> <tspan x="24.98" dy="1.2em" class="st9" v:langID="1045">Blueprint</tspan> <tspan x="20.65" dy="1.2em" class="st9">Templates</tspan></text>		</g>
+		<g id="shape1259-68" v:mID="1259" v:groupContext="shape" transform="translate(303.445,-862.583)">
+			<title>Indigo_Outline.1259</title>
+			<desc>Project Share imported content by linking members with cloud ...</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197" v:verticalAlign="0"/>
+			<v:textRect cx="120.472" cy="1374.94" width="240.95" height="545.669"/>
+			<path d="M0 1102.11 L0 1647.78 L240.94 1647.78 L240.94 1102.11 L0 1102.11 L0 1102.11 Z" class="st19"/>
+			<text x="7.23" y="1156.51" class="st11" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/><v:newlineChar/>Project Share imported <tspan x="33.31" dy="1.2em" class="st9">content by linking <v:lf/></tspan><tspan x="20.33" dy="1.2em" class="st9">members with </tspan><tspan class="st9" v:langID="1045">cloud</tspan> <tspan x="89.41" dy="1.2em" class="st9">zones.</tspan></text>		</g>
+		<g id="shape1260-75" v:mID="1260" v:groupContext="shape" transform="translate(339.391,-1117.73)">
+			<title>Indigo_Outline.1260</title>
+			<desc>Project Members</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="85.3612" cy="1591.12" width="170.73" height="113.32"/>
+			<path d="M0 1534.46 L0 1647.78 L170.72 1647.78 L170.72 1534.46 L0 1534.46 L0 1534.46 Z" class="st20"/>
+			<text x="50.71" y="1583.92" class="st11" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Project <tspan x="38.39" dy="1.2em" class="st9">Members</tspan></text>		</g>
+		<g id="shape1261-79" v:mID="1261" v:groupContext="shape" transform="translate(339.391,-959.84)">
+			<title>Indigo_Outline.1261</title>
+			<desc>Defined Cloud Zones</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="85.3612" cy="1575.94" width="170.73" height="143.688"/>
+			<path d="M0 1504.09 L0 1647.78 L170.72 1647.78 L170.72 1504.09 L0 1504.09 L0 1504.09 Z" class="st20"/>
+			<text x="16.21" y="1568.74" class="st11" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Defined <tspan class="st9" v:langID="1045">Cloud</tspan> <tspan x="56.45" dy="1.2em" class="st9">Zones</tspan></text>		</g>
+		<g id="shape1272-84" v:mID="1272" v:groupContext="shape" v:layerMember="0" transform="translate(349.765,-959.84)">
+			<title>Dynamic connector.1272</title>
+			<path d="M0 1647.78 L0 1884.13 L401.34 1884.13" class="st21"/>
+		</g>
+		<g id="shape1258-90" v:mID="1258" v:groupContext="shape" transform="translate(360.138,-882.767)">
+			<title>Indigo_Outline.1258</title>
+			<desc>Policies</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="334.488" cy="1625.44" width="668.98" height="44.6699"/>
+			<path d="M0 1603.11 L0 1647.78 L668.98 1647.78 L668.98 1603.11 L0 1603.11 L0 1603.11 Z" class="st19"/>
+			<text x="20.28" y="1632.64" class="st11" v:langID="1033"><v:paragraph/><v:tabList/>Policies</text>		</g>
+		<g id="shape1273-93" v:mID="1273" v:groupContext="shape" v:layerMember="0" transform="translate(920.681,-728.782)">
+			<title>Dynamic connector.1273</title>
+			<path d="M-7.08 1641.54 L-7.08 1641.18 L-7.1 1513.98" class="st23"/>
+		</g>
+		<g id="shape1274-99" v:mID="1274" v:groupContext="shape" v:layerMember="0" transform="translate(510.114,-990.945)">
+			<title>Dynamic connector.1274</title>
+			<desc>Item deployed</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="124.28" cy="1630.16" width="93.64" height="24.8035"/>
+			<path d="M0 1640.69 L239.68 1640.69" class="st24"/>
+			<rect v:rectContext="textBkgnd" x="83.0491" y="1621.76" width="82.4617" height="16.8" class="st26"/>
+			<text x="83.05" y="1634.36" class="st27" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Item deployed</text>		</g>
+		<g id="shape1275-107" v:mID="1275" v:groupContext="shape" v:layerMember="0" transform="translate(757.701,-1224.98)">
+			<title>Dynamic connector.1275</title>
+			<desc>Deployment request</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="-124.157" cy="1620.41" width="81.23" height="41.6033"/>
+			<path d="M0 1640.69 L-205.4 1640.69" class="st24"/>
+			<rect v:rectContext="textBkgnd" x="-160.772" y="1603.61" width="70.0615" height="33.5998" class="st26"/>
+			<text x="-160.77" y="1616.21" class="st27" v:langID="1033"><v:paragraph/><v:tabList/>Deployment<v:newlineChar/><tspan x="-160.77" dy="1.2em" class="st9">request</tspan></text>		</g>
+		<g id="shape1281-115" v:mID="1281" v:groupContext="shape" v:layerMember="0" transform="translate(879.689,-1356.78)">
+			<title>Dynamic connector.1281</title>
+			<path d="M0 1647.78 L-263.72 1647.78 L-263.72 1625.03" class="st28"/>
+		</g>
+		<g id="shape1282-118" v:mID="1282" v:groupContext="shape" transform="translate(695.339,-1370.85)">
+			<title>Ocean_Outline.1282</title>
+			<desc>Orchestrator</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197" v:verticalAlign="0"/>
+			<v:textRect cx="120.472" cy="1592.93" width="240.95" height="109.69"/>
+			<path d="M0 1538.09 L0 1647.78 L240.94 1647.78 L240.94 1538.09 L0 1538.09 L0 1538.09 Z" class="st15"/>
+			<text x="32.49" y="1563.09" class="st16" v:langID="1045"><v:paragraph/><v:tabList/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:space/><v:newlineChar/>Orchestrator</text>		</g>
+		<g id="shape1271-121" v:mID="1271" v:groupContext="shape" transform="translate(831.598,-1379.64)">
+			<title>Grey.1271</title>
+			<desc>vRO Workflows SSRs</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="48.0908" cy="1600.36" width="96.19" height="94.8464"/>
+			<path d="M0 1552.93 L0 1647.78 L96.18 1647.78 L96.18 1552.93 L0 1552.93 L0 1552.93 Z" class="st29"/>
+			<text x="33.18" y="1580.56" class="st18" v:langID="1045"><v:paragraph v:horizAlign="1"/><v:tabList/>vRO <tspan x="8.6" dy="1.2em" class="st9">Workflows </tspan><tspan x="31.41" dy="1.5em" class="st9">SSRs</tspan></text>		</g>
+		<g id="shape1280-126" v:mID="1280" v:groupContext="shape" v:layerMember="0" transform="translate(872.602,-1379.64)">
+			<title>Dynamic connector.1280</title>
+			<path d="M7.09 1647.78 L7.09 1715.6" class="st24"/>
+		</g>
+		<g id="shape97-131" v:mID="97" v:groupContext="shape" transform="translate(697.181,-1448.08)">
+			<title>Sheet.97</title>
+			<rect v:rectContext="foreign" x="0" y="1620.99" width="28.5757" height="26.7897" class="st30"/>
+			<image x="0" y="1620.99" width="28.5757" height="26.7897" preserveAspectRatio="none" xlink:href="data:image/png;base64,       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       Eicn4N8irTIUqkR5IwAAAABJRU5ErkJggg=="/>
+			<rect v:rectContext="foreign" x="0" y="1620.99" width="28.5757" height="26.7897" class="st30"/>
+		</g>
+		<g id="shape98-135" v:mID="98" v:groupContext="shape" transform="translate(280.063,-1447.7)">
+			<title>Sheet.98</title>
+			<rect v:rectContext="foreign" x="0" y="1620.99" width="28.5757" height="26.7897" class="st30"/>
+			<image x="0" y="1620.99" width="28.5757" height="26.7897" preserveAspectRatio="none" xlink:href="data:image/png;base64,       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       Eicn4N8irTIUqkR5IwAAAABJRU5ErkJggg=="/>
+			<rect v:rectContext="foreign" x="0" y="1620.99" width="28.5757" height="26.7897" class="st30"/>
+		</g>
+		<g id="shape99-139" v:mID="99" v:groupContext="shape" transform="translate(92.4095,-1265.37)">
+			<title>Sheet.99</title>
+			<rect v:rectContext="foreign" x="0" y="1614.03" width="36" height="33.75" class="st30"/>
+			<image x="0" y="1614.03" width="36" height="33.75" preserveAspectRatio="none" xlink:href="data:image/png;base64,iVBO       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       4N8irTIUqkR5IwAAAABJRU5ErkJggg=="/>
+			<rect v:rectContext="foreign" x="0" y="1614.03" width="36" height="33.75" class="st30"/>
+		</g>
+		<g id="shape1283-143" v:mID="1283" v:groupContext="shape" transform="translate(964.728,-1379.64)">
+			<title>Grey.1283</title>
+			<desc>Custom CSS styles and custom form</desc>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="48.0908" cy="1600.36" width="96.19" height="94.8464"/>
+			<path d="M0 1552.93 L0 1647.78 L96.18 1647.78 L96.18 1552.93 L0 1552.93 L0 1552.93 Z" class="st31"/>
+			<text x="4.99" y="1569.76" class="st18" v:langID="1045"><v:paragraph v:horizAlign="1"/><v:tabList/>Custom CSS <tspan x="11.62" dy="1.2em" class="st9">styles and </tspan><tspan x="21.09" dy="1.2em" class="st9">custom </tspan><tspan x="30.27" dy="1.5em" class="st9">form</tspan></text>		</g>
+		<g id="shape1284-149" v:mID="1284" v:groupContext="shape" v:layerMember="0" transform="translate(1002.05,-1379.64)">
+			<title>Dynamic connector.1284</title>
+			<path d="M7.09 1647.78 L7.09 1751.57" class="st24"/>
+		</g>
+	</g>
+</svg>

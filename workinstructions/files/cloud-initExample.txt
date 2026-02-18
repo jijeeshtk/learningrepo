@@ -1,0 +1,59 @@
+      cloudConfig: |
+        #cloudConfig
+        hostname: ${input.VM_prefix}web${input.VM_sufix}2
+        fqdn: ${input.VM_prefix}web${input.VM_sufix}2.${input.doaminName}
+        manage_etc_hosts: true
+        ssh_pwauth: yes
+        chpasswd:
+          list: |
+            ${input.username}:${input.password}
+          expire: false
+        users:
+          - default
+          - name: ${input.username}
+            lock_passwd: false
+            sudo: ['ALL=(ALL) NOPASSWD:ALL']
+            groups: [root, sudo, adm]
+            shell: '/bin/bash'
+        runcmd:
+        - service sshd start
+        - nmcli connection down ens192
+        - nmcli connection modify "System ens192" ipv4.address ${input.staticipweb2}/${input.ipmask} ipv4.gateway ${input.ipgateway}
+        - nmcli connection modify "System ens192" ipv4.method manual
+        - nmcli connection up "System ens192"        
+        - ip route add default via ${input.ipgateway}
+        - subscription-manager config --server.proxy_hostname=${input.proxy_hostname} --server.proxy_port=${input.proxy_port}
+        - subscription-manager register --username ${input.redhat_login} --password ${input.redhat_password}
+        - subscription-manager attach --auto
+        - yum install httpd -y
+        - yum install mod_ssl -y
+        - yum install openssl -y
+        - yum install php -y
+        - yum install php-mysql -y
+        - yum install php-mysqlnd -ytail 
+        - yum install php-gd -y
+        - yum install wget -y
+        - systemctl stop firewalld
+        - systemctl disable firewalld
+        - systemctl enable httpd.service
+        - sed -i -e 's/^[ \t]*//' /etc/httpd/conf/httpd.conf
+        - sed -i "s|IncludeOptional|#IncludeOptional|" /etc/httpd/conf/httpd.conf
+        - sed -i "s|#ServerName www.example.com:80|ServerName localhost|" /etc/httpd/conf/httpd.conf
+        - sed -i "s|DirectoryIndex index.html|DirectoryIndex index.html index.php|" /etc/httpd/conf/httpd.conf
+        - echo "AddType application/x-httpd-php .php" | sudo tee -a /etc/httpd/conf/httpd.conf
+        - setsebool -P httpd_can_network_connect_db on
+        #config added by client
+        #create index.php
+        - echo "<?php phpinfo(); ?>" | tee /var/www/html/index.php
+        #configure wget
+        - sed -i "s|#https_proxy = http://proxy.yoyodyne.com:18023/|https_proxy = http://${input.proxy_hostname}:${input.proxy_port}|" /etc/wgetrc
+        - sed -i "s|#http_proxy = http://proxy.yoyodyne.com:18023/|http_proxy = http://${input.proxy_hostname}:${input.proxy_port}|" /etc/wgetrc
+        #wordpress
+        - wget http://wordpress.org/wordpress-5.1.2.tar.gz
+        - tar -xvf wordpress-5.1.2.tar.gz
+        - mv -vf wordpress /var/www/html
+        - chown -R apache:apache /var/www/html/*
+        - chcon -R unconfined_u:object_r:httpd_sys_rw_content_t:s0  /var/www/html/wordpress
+        #end wordpress
+        - systemctl start httpd
+        - subscription-manager unregister

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 976 698" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,128.689,79.5342)">
+        <g id="Layer-1" serif:id="Layer 1">
+            <g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <rect x="64" y="9072" width="15872" height="8368" style="fill:rgb(0,32,96);"/>
+                </g>
+                <rect x="0" y="0.24" width="656.351" height="525.101" style="fill:none;"/>
+                <clipPath id="_clip1">
+                    <rect x="0" y="0.24" width="656.351" height="525.101"/>
+                </clipPath>
+                <g clip-path="url(#_clip1)">
+                    <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                        <rect x="64" y="9072" width="15872" height="8368" style="fill:none;stroke:rgb(0,112,192);stroke-width:133px;"/>
+                    </g>
+                    <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                        <rect x="128" y="10592" width="31744" height="7200" style="fill:rgb(0,176,240);"/>
+                    </g>
+                    <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                        <rect x="128" y="10592" width="31744" height="7200" style="fill:none;stroke:rgb(0,112,192);stroke-width:266.99px;"/>
+                    </g>
+                    <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                        <rect x="128" y="8112" width="31744" height="2480" style="fill:rgb(0,176,240);"/>
+                    </g>
+                    <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                        <rect x="128" y="8112" width="31744" height="2480" style="fill:none;stroke:rgb(0,112,192);stroke-width:266.99px;"/>
+                    </g>
+                </g>
+                <rect x="0" y="0" width="704.827" height="525.341" style="fill:none;"/>
+                <g transform="matrix(0.239982,0,0,0.239991,76.3151,148.121)">
+                    <g transform="matrix(92,0,0,92,1365.59,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:92px;fill:white;">A<tspan x="61.999px 118.999px 140.983px 164.968px 220.967px 273.981px 302.966px 333.966px 383.966px 407.951px 464.95px 518.964px 537.98px 590.994px 619.978px 644.963px 668.963px 730.963px 761.963px 780.979px 829.993px 847.901px 909.9px 963.914px 992.899px 1046.91px 1130.91px 1179.93px 1208.91px 1227.93px 1281.94px 1334.96px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">PI Entry Point (Aria Automation)</tspan></text>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="1248" y="21712" width="29120" height="2608" style="fill:rgb(0,176,240);"/>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="1248" y="21712" width="29120" height="2608" style="fill:none;stroke:rgb(15,15,15);stroke-width:266.99px;"/>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,153.709,352.53)">
+                    <g transform="matrix(83,0,0,83,690.149,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:83px;fill:white;">V<tspan x="55.999px 113.013px 163.013px 184.999px 257.999px 303.012px 351.025px 396.037px 447.05px 495.063px 571.063px 619.076px 667.089px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">CS Management</tspan></text>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,116.152,306.23)">
+                    <g transform="matrix(117,0,0,117,1031.07,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:117px;fill:white;">V<tspan x="78.999px 160.019px 231.018px 259.998px 332.997px 400.015px 463.015px 519.015px 543.035px 607.035px 670.053px 700.072px 730.053px 798.07px 861.088px 924.088px 992.106px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">CS Physical Layer</tspan></text>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,69.3556,209.566)">
+                    <g transform="matrix(100,0,0,100,1419.73,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:100px;fill:rgb(15,15,15);">V<tspan x="67.999px 137.016px 198.015px 222.998px 292.015px 346.03px 378.014px 432.029px 458.046px 517.061px 578.076px 605.059px 659.075px 717.09px 779.105px 804.088px 879.071px 913.072px 968.072px 1026.09px 1084.1px 1132.1px 1164.09px 1198.09px 1252.1px 1284.09px 1305.1px 1364.12px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">CS Catalog and Orchestration</tspan></text>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,192.946,226.846)">
+                    <g transform="matrix(50,0,0,50,392.929,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:50px;fill:rgb(15,15,15);">(<tspan x="13px 47px 64px 74.009px 101.016px 109.249px 143.249px 172.256px 188.248px 218.256px 264.256px 291.264px 307.255px 317.264px 347.271px 376.279px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">Aria Automation)</tspan></text>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="1248" y="24672" width="29120" height="2608" style="fill:rgb(0,176,240);"/>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="1248" y="24672" width="29120" height="2608" style="fill:none;stroke:rgb(15,15,15);stroke-width:266.99px;"/>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,136.906,396.867)">
+                    <g transform="matrix(83,0,0,83,833.729,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:83px;fill:white;">V<tspan x="55.999px 113.013px 163.013px 184.999px 246.013px 291.013px 342.025px 390.038px 418.039px 462.039px 479.053px 519.053px 568.065px 596.066px 620.052px 668.065px 713.077px 758.077px 806.09px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">CS Hypervisor Layer</tspan></text>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="1248" y="27536" width="29120" height="2608" style="fill:rgb(0,176,240);"/>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="1248" y="27536" width="29120" height="2608" style="fill:none;stroke:rgb(15,15,15);stroke-width:266.99px;"/>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,153.944,439.878)">
+                    <g transform="matrix(83,0,0,83,691.156,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:83px;fill:white;">V<tspan x="55.999px 113.013px 163.013px 184.999px 204.985px 252.997px 278.983px 306.984px 351.997px 391.997px 418.983px 446.983px 495.996px 540.996px 567.982px 616.995px 644.995px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">CS Infrastructure</tspan></text>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <path d="M16308,17436L17820,17436" style="fill:none;stroke:rgb(75,75,75);stroke-width:50px;"/>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <path d="M16308,4052L17820,4052" style="fill:none;stroke:rgb(75,75,75);stroke-width:50px;"/>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <path d="M17068,4052L17068,17435" style="fill:none;stroke:rgb(75,75,75);stroke-width:50px;"/>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="128" y="208" width="31744" height="2480" style="fill:rgb(63,156,53);"/>
+                </g>
+                <rect x="0" y="0.24" width="656.351" height="525.101" style="fill:none;"/>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="128" y="208" width="31744" height="2480" style="fill:none;stroke:white;stroke-width:200px;"/>
+                </g>
+                <rect x="0" y="0" width="704.827" height="525.341" style="fill:none;"/>
+                <g transform="matrix(0.239982,0,0,0.239991,154.549,30.3094)">
+                    <g transform="matrix(100,0,0,100,706.298,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:100px;fill:white;">C<tspan x="69.017px 128.032px 176.032px 208.015px 267.03px 359.031px 417.046px 451.047px 477.03px 501.014px 561.998px 622.997px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">ustomer ITSM</tspan></text>
+                </g>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="128" y="3168" width="31744" height="2464" style="fill:rgb(63,156,53);"/>
+                </g>
+                <rect x="0" y="0.24" width="656.351" height="525.101" style="fill:none;"/>
+                <g transform="matrix(0.0149989,0,0,0.0149995,0,0)">
+                    <rect x="128" y="3168" width="31744" height="2464" style="fill:none;stroke:white;stroke-width:200px;"/>
+                </g>
+                <rect x="0" y="0" width="704.827" height="525.341" style="fill:none;"/>
+                <g transform="matrix(0.239982,0,0,0.239991,147.355,74.6193)">
+                    <g transform="matrix(100,0,0,100,771.764,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:100px;fill:white;">C<tspan x="69.017px 128.032px 176.032px 208.015px 267.03px 359.031px 417.046px 451.047px 477.03px 546.047px 634.048px 705.065px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">ustomer CMDB</tspan></text>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <path d="M16308,2756L17820,2756" style="fill:none;stroke:rgb(75,75,75);stroke-width:50px;"/>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <path d="M16308,204L17820,204" style="fill:none;stroke:rgb(75,75,75);stroke-width:50px;"/>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <path d="M17068,204L17068,2755" style="fill:none;stroke:rgb(75,75,75);stroke-width:50px;"/>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,537.802,50.6002)">
+                    <g transform="matrix(83,0,0,83,493.169,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:83px;fill:rgb(75,75,75);">N<tspan x="64.014px 113.027px 140.013px 161.999px 181.985px 229.997px 251.983px 301.983px 346.983px 395.995px 447.008px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">ot In Scope</tspan></text>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,549.141,378.481)">
+                    <g transform="matrix(83,0,0,83,277.837,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:83px;fill:rgb(75,75,75);">9<tspan x="48.013px 96.025px 111.011px 159.024px 204.037px " y="0px 0px 0px 0px 0px ">9.95%</tspan></text>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <rect x="624" y="15216" width="14560" height="1312" style="fill:rgb(0,176,240);"/>
+                </g>
+                <g transform="matrix(0.0299978,0,0,0.0299989,0,0)">
+                    <rect x="624" y="15216" width="14560" height="1312" style="fill:none;stroke:rgb(15,15,15);stroke-width:133px;"/>
+                </g>
+                <g transform="matrix(0.239982,0,0,0.239991,148.67,483.328)">
+                    <g transform="matrix(83,0,0,83,741.434,0)">
+                    </g>
+                    <text x="0px" y="0px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:83px;fill:white;">V<tspan x="55.999px 113.013px 163.013px 184.999px 242.013px 291.025px 339.038px 366.024px 411.037px 428.051px 476.063px 524.076px 552.077px 576.063px 596.049px 641.061px 686.074px " y="0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px ">CS Container IaaS</tspan></text>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
