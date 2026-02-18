@@ -1,4 +1,6 @@
-# VERSION - Documentation
+---
+title: "main - Documentation"
+---
 
 Please use the following links or the sidebar to navigate the documentation.
 
