@@ -7,10 +7,30 @@ metaDataFormat = "yaml"
 pygmentsUseClasses = true
 pygmentCodeFences = true
 
-# THEME (loaded in classic mode)
 theme = "aec-documentation"
 
 disableSearch = true
+
+[module]
+  [[module.mounts]]
+    source = 'main'
+    target = 'content'
+
+  [[module.mounts]]
+    source = 'design'
+    target = 'content/design'
+
+  [[module.mounts]]
+    source = 'workinstructions'
+    target = 'content/workinstructions'
+
+  [[module.mounts]]
+    source = 'design/images'
+    target = 'static/images'
+
+  [[module.mounts]]
+    source = 'workinstructions/images'
+    target = 'static/images'
 
 [Params]
   subtitle = "Learning Repo DEV Documentation"
