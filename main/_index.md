@@ -7,4 +7,3 @@ Please use the following links or the sidebar to navigate the documentation.
 ## [Work Instructions](workinstructions.html)
 
 ## [Read a different version of VCS Documentation](..)
-``
