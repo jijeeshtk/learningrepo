@@ -4,10 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'develop'
-      - 'dev-*'
-      - 'feature/*'
-      - 'main'
+      - main
+      - develop
 
 jobs:
   create-pages:
@@ -16,3 +14,28 @@ jobs:
       GH_ACTIONS_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
     with:
       GH_BRANCH: ${{ github.ref_name }}
+
+  deploy-pages:
+    needs: create-pages
+    environment:
+      name: github-pages
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hugo-pages
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
